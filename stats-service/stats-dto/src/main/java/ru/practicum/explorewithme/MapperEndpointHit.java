@@ -2,26 +2,25 @@ package ru.practicum.explorewithme;
 
 import lombok.experimental.UtilityClass;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @UtilityClass
 public class MapperEndpointHit {
 
     public static EndpointHit toEndpointHit(RequestEndpointHit requestEndpointHit) {
-        EndpointHit endpointHit =new EndpointHit();
+        EndpointHit endpointHit = new EndpointHit();
         endpointHit.setApp(requestEndpointHit.getApp());
         endpointHit.setUri(requestEndpointHit.getUri());
         endpointHit.setIp(requestEndpointHit.getIp());
-        var t = Timestamp.valueOf(requestEndpointHit.getTimestamp());
-        var l = t.toLocalDateTime();
-        endpointHit.setTimestamp(l);
+        LocalDateTime timestamp = getLocalDateTime(requestEndpointHit.getTimestamp());
+        endpointHit.setTimestamp(timestamp);
         return endpointHit;
     }
 
-    public static ResponseEndpointHit toResponseEndpointHit(EndpointHit endpointHit) {
-        return new ResponseEndpointHit(
-                endpointHit.getApp(),
-                endpointHit.getUri()
-        );
+    public static LocalDateTime getLocalDateTime(String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return LocalDateTime.parse(date, formatter);
     }
+
 }

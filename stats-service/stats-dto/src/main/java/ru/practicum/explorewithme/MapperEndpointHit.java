@@ -1,14 +1,17 @@
 package ru.practicum.explorewithme;
 
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 
 @UtilityClass
+@Slf4j
 public class MapperEndpointHit {
 
-    public static EndpointHit toEndpointHit(RequestEndpointHit requestEndpointHit) {
+    public static EndpointHit toEndpointHit(EndpointHitDto requestEndpointHit) {
         EndpointHit endpointHit = new EndpointHit();
         endpointHit.setApp(requestEndpointHit.getApp());
         endpointHit.setUri(requestEndpointHit.getUri());
@@ -16,6 +19,17 @@ public class MapperEndpointHit {
         LocalDateTime timestamp = getLocalDateTime(requestEndpointHit.getTimestamp());
         endpointHit.setTimestamp(timestamp);
         return endpointHit;
+    }
+
+    public static ViewStats toViewStats (EndpointHit endpointHit) {
+        String[] uriString = endpointHit.getUri().split("/");
+        log.info("This is length of uriString {}", uriString.length);
+        log.info("This is number[id] of events = {}", uriString[2]);
+        return new ViewStats(
+                endpointHit.getApp(),
+                endpointHit.getUri(),
+                endpointHit.getId().intValue()
+        );
     }
 
     public static LocalDateTime getLocalDateTime(String date) {

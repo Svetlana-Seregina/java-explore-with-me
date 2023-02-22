@@ -5,7 +5,7 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 
 @Data
-public class RequestEndpointHit {
+public class EndpointHitDto {
     @NotBlank
     private final String app;
     @NotBlank

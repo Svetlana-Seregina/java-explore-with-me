@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> {
 
-    List<EndpointHit> findByTimestampAfterAndTimestampBeforeAndUriIn(LocalDateTime start,
-                                                                     LocalDateTime end,
-                                                                     List<String> uris);
+    List<EndpointHit> findByTimestampAfterAndTimestampBefore(LocalDateTime start,
+                                                             LocalDateTime end);
 }

@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface StatsService {
 
-    void save(RequestEndpointHit requestStatsDto);
+    void save(EndpointHitDto endpointHitDto);
 
-    List<ResponseViewStats> findAll(String start, String end, List<String> uris, boolean unique);
+    List<ViewStats> getStats(String start, String end, List<String> uris, boolean unique);
 }

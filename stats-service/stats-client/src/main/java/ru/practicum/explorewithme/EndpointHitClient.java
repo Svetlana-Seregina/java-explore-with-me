@@ -25,7 +25,7 @@ public class EndpointHitClient extends BaseClient {
         );
     }
 
-    public void save(RequestEndpointHit requestEndpointHit) {
+    public void save(EndpointHitDto requestEndpointHit) {
         post("/hit", requestEndpointHit);
     }
 

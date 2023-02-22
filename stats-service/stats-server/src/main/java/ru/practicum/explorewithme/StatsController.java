@@ -19,20 +19,22 @@ public class StatsController {
     private final StatsService statsService;
 
     @PostMapping("/hit")
-    public ResponseEntity<Object> save(@RequestBody RequestEndpointHit requestEndpointHit) {
-        log.info("Saving statistics: app = {}, uri = {}, ip = {}, timestamp = {}", requestEndpointHit.getApp(),
-                requestEndpointHit.getUri(), requestEndpointHit.getIp(), requestEndpointHit.getTimestamp());
-        statsService.save(requestEndpointHit);
+    public ResponseEntity<Object> save(@RequestBody EndpointHitDto endpointHitDto) {
+        log.info("Saving statistics: app = {}, uri = {}, ip = {}, timestamp = {}", endpointHitDto.getApp(),
+                endpointHitDto.getUri(), endpointHitDto.getIp(), endpointHitDto.getTimestamp());
+        statsService.save(endpointHitDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/stats")
-    public List<ResponseViewStats> findAll(@RequestParam(name = "start") String start,
-                                           @RequestParam(name = "end") String end,
-                                           @RequestParam(name = "uris") List<String> uris,
-                                           @RequestParam(name = "unique", defaultValue = "false") boolean unique) {
-        log.info("Get statistics: start = {}, end = {}, uris = {}, unique = {}", start, end, uris.get(0), unique);
-        return statsService.findAll(start, end, uris, unique);
+    public List<ViewStats> getStats(@RequestParam(name = "start") String start,
+                                    @RequestParam(name = "end") String end,
+                                    @RequestParam(name = "uris", required = false) List<String> uris,
+                                    @RequestParam(name = "unique", required = false, defaultValue = "false") boolean unique) {
+        log.info("Get statistics: start = {}, end = {}, uris = {}, unique = {}", start, end, uris.size(), unique);
+        log.info("Get uri: uris = {}", uris);
+        log.info("Get uri: uris = {}", uris.get(0));
+        return statsService.getStats(start, end, uris, unique);
     }
 
 }

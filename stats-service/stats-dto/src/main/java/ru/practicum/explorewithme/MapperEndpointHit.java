@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 
 @UtilityClass
 @Slf4j
@@ -21,7 +20,7 @@ public class MapperEndpointHit {
         return endpointHit;
     }
 
-    public static ViewStats toViewStats (EndpointHit endpointHit) {
+    public static ViewStats toViewStats(EndpointHit endpointHit) {
         String[] uriString = endpointHit.getUri().split("/");
         log.info("This is length of uriString {}", uriString.length);
         log.info("This is number[id] of events = {}", uriString[2]);

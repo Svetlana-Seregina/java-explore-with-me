@@ -16,7 +16,7 @@ public class EndpointHitClient extends BaseClient {
     private static final String API_PREFIX = "";
 
     @Autowired
-    public EndpointHitClient(@Value("${stats-server.url") String serverUrl, RestTemplateBuilder builder) {
+    public EndpointHitClient(@Value("${stats-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))

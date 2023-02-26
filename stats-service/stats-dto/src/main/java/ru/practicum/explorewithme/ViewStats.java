@@ -8,7 +8,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ViewStats {
+
     private final String app;
     private final String uri;
     private final Integer hits;
+
 }

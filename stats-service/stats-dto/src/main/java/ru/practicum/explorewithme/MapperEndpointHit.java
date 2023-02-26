@@ -27,8 +27,9 @@ public class MapperEndpointHit {
         return new ViewStats(
                 endpointHit.getApp(),
                 endpointHit.getUri(),
-                endpointHit.getId().intValue()
+                endpointHit.getId().intValue() + 1
         );
+
     }
 
     public static LocalDateTime getLocalDateTime(String date) {

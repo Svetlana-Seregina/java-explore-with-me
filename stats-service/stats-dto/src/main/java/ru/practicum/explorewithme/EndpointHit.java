@@ -18,11 +18,13 @@ public class EndpointHit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String app;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "app_id")
+    private Application app;
+
     private String uri;
+
     private String ip;
+
     private LocalDateTime timestamp;
-
-
-
 }

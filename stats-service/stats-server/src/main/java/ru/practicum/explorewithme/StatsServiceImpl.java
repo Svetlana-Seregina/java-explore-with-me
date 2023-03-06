@@ -22,7 +22,7 @@ public class StatsServiceImpl implements StatsService {
     public void save(EndpointHitDto endpointHitDto) {
         String appName = endpointHitDto.getApp();
         Application app = applicationRepository.findByName(appName)
-                .orElse(applicationRepository.save(MapperEndpointHit.toApplication(appName)));
+                .orElseGet(() -> applicationRepository.save(MapperEndpointHit.toApplication(appName)));
         log.info("Получен app с id = {}, name = {}", app.getId(), app.getName());
         EndpointHit endpointHit = endpointHitRepository.save(MapperEndpointHit.toEndpointHit(endpointHitDto, app));
         log.info("Данные сохранены в БД, id = {}, uri = {}, appName = {}, appId = {}",

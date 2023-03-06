@@ -12,6 +12,6 @@ public class EndpointHitDto {
     private final String uri;
     @NotBlank
     private final String ip;
-
+    @NotBlank
     private final String timestamp;
 }

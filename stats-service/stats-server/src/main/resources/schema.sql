@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS endpointhit, application;
 CREATE TABLE IF NOT EXISTS application
 (
     id     BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    name   VARCHAR(255) NOT NULL UNIQUE
+    name   VARCHAR(255) NOT NULL unique
 );
 
 CREATE TABLE IF NOT EXISTS endpointhit

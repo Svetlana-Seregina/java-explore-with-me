@@ -13,9 +13,12 @@ import ru.practicum.explorewithme.dto.event.EventFullDto;
 import ru.practicum.explorewithme.dto.event.UpdateEventAdminRequest;
 import ru.practicum.explorewithme.dto.user.NewUserRequest;
 import ru.practicum.explorewithme.dto.user.UserDto;
+import ru.practicum.explorewithme.mappers.CategoryMapper;
 import ru.practicum.explorewithme.mappers.UserMapper;
+import ru.practicum.explorewithme.repository.CategoryRepository;
 import ru.practicum.explorewithme.repository.UserRepository;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +30,7 @@ import java.util.List;
 public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public List<UserDto> findUsers(List<Long> ids, Integer from, Integer size) {
@@ -34,7 +38,7 @@ public class AdminServiceImpl implements AdminService {
                 PageRequest.of(from, size);*/
         List<UserDto> userDtoList = userRepository.findAllById(ids);
         log.info("Найдено {} пользователей", userDtoList.size());
-        if(userDtoList.size() == 0) {
+        if (userDtoList.size() == 0) {
             return Collections.emptyList();
         }
         return userDtoList;
@@ -56,23 +60,43 @@ public class AdminServiceImpl implements AdminService {
         return userRepository.existsById(userId);
     }
 
+    @Transactional
     @Override
     public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
-        return null;
+        CategoryDto category = categoryRepository.save(CategoryMapper.toCategoryDto(newCategoryDto));
+        log.info("Содана новая категория с названием = {}", category.getName());
+        return category;
     }
 
+    @Transactional
     @Override
     public boolean deleteById(long id) {
-        return false;
+        categoryRepository.deleteById(id);
+        log.info("Категория с id = {} удалена.", id);
+        return categoryRepository.existsById(id);
     }
 
     @Override
-    public void updateCategoryName(long id) {
+    public CategoryDto updateCategoryName(long id, NewCategoryDto newCategoryDto) {
+        CategoryDto category = categoryRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Категории с id = %d нет в базе.", id)));
+        log.info("Найдена категория по id = {}, name = {}", category.getId(), category.getName());
+        if (newCategoryDto.getName() != null && !newCategoryDto.getName().isBlank()) {
+            String name = newCategoryDto.getName();
+            if (categoryRepository.findByName(name).isPresent()) {
+                throw new RuntimeException(String.format("Категория с таким именем = %s уже существует в базе.", name));
+            }
+            category.setName(name);
+            log.info("Имя категории изменено на {}, id = {}", category.getName(), category.getId());
+            return category;
+        }
+        category.setName(category.getName());
+        return category;
     }
 
     @Override
-    public EventFullDto findAllCategories(List<Integer> users, List<String> states, List<Integer> categories,
-                                          LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
+    public EventFullDto findAllEvents(List<Integer> users, List<String> states, List<Integer> categories,
+                                      LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
         return null;
     }
 

@@ -25,9 +25,9 @@ public interface AdminService {
 
     boolean deleteById(long id);
 
-    void updateCategoryName(long id);
+    CategoryDto updateCategoryName(long id, NewCategoryDto newCategoryDto);
 
-    EventFullDto findAllCategories(List<Integer> users, List<String> states, List<Integer> categories,
+    EventFullDto findAllEvents(List<Integer> users, List<String> states, List<Integer> categories,
                                    LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size);
 
     void updateEventById(UpdateEventAdminRequest updateEventAdminRequest);

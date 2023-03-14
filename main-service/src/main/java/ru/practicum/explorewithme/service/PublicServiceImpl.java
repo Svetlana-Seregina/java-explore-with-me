@@ -2,14 +2,17 @@ package ru.practicum.explorewithme.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explorewithme.dto.category.CategoryDto;
 import ru.practicum.explorewithme.dto.compilation.CompilationDto;
 import ru.practicum.explorewithme.dto.event.EventFullDto;
 import ru.practicum.explorewithme.dto.event.EventShortDto;
+import ru.practicum.explorewithme.repository.CategoryRepository;
 
+import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -17,6 +20,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class PublicServiceImpl implements PublicService {
+
+    private final CategoryRepository categoryRepository;
 
     @Override
     public List<CompilationDto> findAllCompilations(Boolean pinned, Integer from, Integer size) {
@@ -30,12 +35,20 @@ public class PublicServiceImpl implements PublicService {
 
     @Override
     public List<CategoryDto> findAllCategories(Integer from, Integer size) {
-        return null;
+        List<CategoryDto> categoryDtoList = categoryRepository.findAll();
+        if (categoryDtoList.size() == 0) {
+            return Collections.emptyList();
+        }
+        log.info("Найдено {} категорий", categoryDtoList.size());
+        return categoryDtoList;
     }
 
     @Override
-    public CategoryDto findCategoriesById(long id) {
-        return null;
+    public CategoryDto findCategoryById(long catId) {
+        CategoryDto category = categoryRepository.findById(catId)
+                .orElseThrow(() -> new EntityNotFoundException("Категория не найдена в базе"));
+        log.info("Найдена категория с названием = {}", category.getName());
+        return category;
     }
 
     @Override

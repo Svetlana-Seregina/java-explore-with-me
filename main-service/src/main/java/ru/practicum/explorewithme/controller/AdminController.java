@@ -24,7 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
-//@Validated
+@Validated
 @Slf4j
 public class AdminController {
 
@@ -54,36 +54,41 @@ public class AdminController {
     }
 
     @PostMapping("/categories")
-    public CategoryDto createCategory(@RequestBody NewCategoryDto newCategoryDto) {
-        return adminService.createCategory(newCategoryDto);
+    public ResponseEntity<CategoryDto> createCategory(@RequestBody @Valid NewCategoryDto newCategoryDto) {
+        CategoryDto categoryDto = adminService.createCategory(newCategoryDto);
+        return new ResponseEntity<>(categoryDto, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/categories/{catId}")
-    public boolean deleteById(@PathVariable long catId) {
-        return adminService.deleteById(catId);
+    public ResponseEntity<Boolean> deleteById(@PathVariable long catId) {
+        log.info("Создан запрос на удаление категории по id = {}", catId);
+        boolean categoryDelete = adminService.deleteById(catId);
+        return new ResponseEntity<>(categoryDelete, HttpStatus.NO_CONTENT);
     }
 
     @PatchMapping("/categories/{catId}")
-    public void updateCategoryName(@PathVariable long catId) {
-        adminService.updateCategoryName(catId);
+    public ResponseEntity<CategoryDto> updateCategoryName(@PathVariable long catId,
+                                                          @RequestBody @Valid NewCategoryDto newCategoryDto) {
+        CategoryDto categoryDto = adminService.updateCategoryName(catId, newCategoryDto);
+        return new ResponseEntity<>(categoryDto, HttpStatus.OK);
     }
 
+
     @GetMapping("/events")
-    public EventFullDto findAllCategories(@RequestParam(value = "users") List<Integer> users,
-                                          @RequestParam(value = "states") List<String> states,
-                                          @RequestParam(value = "categories") List<Integer> categories,
-                                          @RequestParam(value = "rangeStart") LocalDateTime rangeStart,
-                                          @RequestParam(value = "rangeEnd") LocalDateTime rangeEnd,
-                                          @RequestParam(value = "from", defaultValue = "0") Integer from,
-                                          @RequestParam(value = "size", defaultValue = "10") Integer size) {
-        return adminService.findAllCategories(users, states, categories, rangeStart, rangeEnd, from, size);
+    public EventFullDto findAllEvents(@RequestParam(value = "users") List<Integer> users,
+                                      @RequestParam(value = "states") List<String> states,
+                                      @RequestParam(value = "categories") List<Integer> categories,
+                                      @RequestParam(value = "rangeStart") LocalDateTime rangeStart,
+                                      @RequestParam(value = "rangeEnd") LocalDateTime rangeEnd,
+                                      @RequestParam(value = "from", defaultValue = "0") Integer from,
+                                      @RequestParam(value = "size", defaultValue = "10") Integer size) {
+        return adminService.findAllEvents(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 
     @PatchMapping("/events/{id}")
     public void updateEventById(@RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
         adminService.updateEventById(updateEventAdminRequest);
     }
-
 
 
     @PostMapping("/compilations")

@@ -16,7 +16,7 @@ public interface PublicService {
 
     List<CategoryDto> findAllCategories(Integer from, Integer size);
 
-    CategoryDto findCategoriesById(long id);
+    CategoryDto findCategoryById(long catId);
 
     List<EventShortDto> findAllEvents(String text, List<Integer> categories, Boolean paid, LocalDateTime rangeStart,
                                       LocalDateTime rangeEnd, Boolean onlyAvailable, String sort, Integer from, Integer size);

@@ -19,7 +19,7 @@ public class CategoryDto {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-
+    @Column(unique = true)
     String name;
 
 }

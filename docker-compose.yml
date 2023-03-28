@@ -22,3 +22,27 @@ services:
       - POSTGRES_DB=endpointhit
       - POSTGRES_USER=endpointhituser
       - POSTGRES_PASSWORD=password
+
+  main-service:
+    build: main-service
+      image: ewm-main-service
+      container_name: ewm-main-service
+      ports:
+        - "8080:8080"
+      depends_on:
+        - main-db
+      environment:
+        - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/endpointhit
+        - SPRING_DATASOURCE_USERNAME=endpointhituser
+        - SPRING_DATASOURCE_PASSWORD=password
+        - STATS_SERVER_URL=http://stats-service/stats-server:9090
+
+  main-db:
+    image: postgres:14.3-alpine
+    container_name: main-db
+    ports:
+       - "6541:5432"
+    environment:
+       - POSTGRES_DB=endpointhit
+       - POSTGRES_USER=endpointhituser
+       - POSTGRES_PASSWORD=password

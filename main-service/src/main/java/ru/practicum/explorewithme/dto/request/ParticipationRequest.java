@@ -1,11 +1,11 @@
-package ru.practicum.explorewithme.dto;
+package ru.practicum.explorewithme.dto.request;
 
 import lombok.*;
-import ru.practicum.explorewithme.dto.event.EventFullDto;
-import ru.practicum.explorewithme.dto.event.EventState;
+import ru.practicum.explorewithme.dto.event.Event;
 import ru.practicum.explorewithme.dto.user.UserDto;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "participation_request", schema = "public")
@@ -13,22 +13,25 @@ import javax.persistence.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ParticipationRequestDto {
+@ToString
+public class ParticipationRequest {
 
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // Идентификатор заявки
 
-    private String created; // Дата и время создания заявки
+    private LocalDateTime created; // Дата и время создания заявки
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "event_id")
-    private EventFullDto event; // Идентификатор события
+    private Event event; // Идентификатор события
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     private UserDto requester; // Идентификатор пользователя, отправившего заявку
 
-    private EventState status; // Статус заявки
+    @Enumerated(EnumType.STRING)
+    private EventRequestStatus status; // Статус заявки
+
 }

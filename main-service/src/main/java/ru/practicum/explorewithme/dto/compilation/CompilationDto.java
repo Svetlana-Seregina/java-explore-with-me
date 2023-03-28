@@ -1,33 +1,19 @@
 package ru.practicum.explorewithme.dto.compilation;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import ru.practicum.explorewithme.dto.event.EventFullDto;
+import lombok.Data;
+import ru.practicum.explorewithme.dto.event.EventShortDto;
 
-import javax.persistence.*;
+import java.util.List;
 
-@Entity
-@Table(name = "compilation", schema = "public")
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 public class CompilationDto {
-    // Подборка событий
 
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private final List<EventShortDto> events;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "event_id")
-    EventFullDto events;
+    private final Long id; // Идентификатор
 
-    Boolean pinned; // Закреплена ли подборка на главной странице сайта
+    private final Boolean pinned; // Закреплена ли подборка на главной странице сайта
 
-    String title; // Заголовок подборки
+    private final String title; // Заголовок подборки
 
 }

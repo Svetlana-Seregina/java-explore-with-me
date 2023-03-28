@@ -1,9 +1,6 @@
 package ru.practicum.explorewithme.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -11,6 +8,7 @@ import javax.persistence.*;
 @Table(name = "locations", schema = "public")
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class Location {
@@ -18,7 +16,10 @@ public class Location {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    Double lat; // широта места проведения события
-    Double lon; // долгота
+    private Long id;
+
+    private Double lat; // широта места проведения события
+
+    private Double lon; // долгота
+
 }

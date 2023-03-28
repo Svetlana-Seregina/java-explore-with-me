@@ -33,6 +33,9 @@ public class StatsController {
                                     @RequestParam(name = "unique", defaultValue = "false") boolean unique) {
         log.info("Get statistics: start = {}, end = {}, uris = {}, unique = {}", start, end, uris.size(), unique);
         log.info("Get uri: uris = {}", uris);
-        return statsService.getStats(start, end, uris, unique);
+        List<ViewStats> viewStats = statsService.getStats(start, end, uris, unique);
+        log.info("Получен ответ statsService.getStats(start, end, uris, unique); = {}", viewStats);
+        return viewStats;
+        //return List.of(new ViewStats("app", "uri", 5L));
     }
 }

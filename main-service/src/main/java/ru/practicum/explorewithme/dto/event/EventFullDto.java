@@ -1,69 +1,54 @@
 package ru.practicum.explorewithme.dto.event;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import ru.practicum.explorewithme.dto.Location;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 import ru.practicum.explorewithme.dto.category.CategoryDto;
-import ru.practicum.explorewithme.dto.user.UserDto;
+import ru.practicum.explorewithme.dto.user.UserShortDto;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "events", schema = "public")
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 public class EventFullDto {
 
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private final String annotation;
 
-    private String annotation;
+    private final CategoryDto category;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "category_id")
-    private CategoryDto category;
+    private final Long confirmedRequests; // Количество одобренных заявок на участие в данном событии
 
-    @Column(name = "confirmed_requests")
-    private Long confirmedRequests; // Количество одобренных заявок на участие в данном событии
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private final LocalDateTime createdOn; // Дата и время создания события (в формате "yyyy-MM-dd HH:mm:ss")
 
-    @Column(name = "created_on")
-    private LocalDateTime createdOn; // Дата и время создания события (в формате "yyyy-MM-dd HH:mm:ss")
+    private final String description;
 
-    private String description;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private final LocalDateTime eventDate; // Дата и время на которые намечено событие (в формате "yyyy-MM-dd HH:mm:ss")
 
-    @Column(name = "event_date")
-    private LocalDateTime eventDate; // Дата и время на которые намечено событие (в формате "yyyy-MM-dd HH:mm:ss")
+    private final Long id; // Идентификатор
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id")
-    private UserDto initiator;
+    private final UserShortDto initiator;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "location_id")
-    private Location location;
+    private final Location location;
 
-    private Boolean paid; // Нужно ли оплачивать участие
+    private final Boolean paid; // Нужно ли оплачивать участие
 
-    @Column(name = "participant_limit")
-    private Long participantLimit; // Ограничение на количество участников. Значение 0 - означает отсутствие ограничения
+    private final Long participantLimit; // Ограничение на количество участников. Значение 0 - означает отсутствие ограничения
 
-    @Column(name = "published_on")
-    private LocalDateTime publishedOn; // Дата и время публикации события (в формате "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private final LocalDateTime publishedOn; // Дата и время публикации события (в формате "yyyy-MM-dd HH:mm:ss")
 
-    @Column(name = "request_moderation")
-    private Boolean requestModeration; // Нужна ли пре-модерация заявок на участие
+    private final Boolean requestModeration; // Нужна ли пре-модерация заявок на участие
 
-    @Enumerated(EnumType.STRING)
-    private EventState state; // Список состояний жизненного цикла события: PUBLISH_EVENT, REJECT_EVENT
+    private final EventState state; // Список состояний жизненного цикла события: PENDING, PUBLISHED, CANCELED
 
-    private String title; // Заголовок
+    private final String title; // Заголовок
 
-    private Long view; // Количество просмотрев события
+    private final Long views; // Количество просмотрев события
+
+    @Data
+    public static class Location {
+        private final double lat;
+        private final double lon;
+    }
+
 }

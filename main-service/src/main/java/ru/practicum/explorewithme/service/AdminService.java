@@ -15,27 +15,27 @@ import java.util.List;
 
 public interface AdminService {
 
-    List<UserDto> findUsers(List<Long> ids, Integer from, Integer size);
+    List<UserDto> findAllUsers(List<Long> ids, Integer from, Integer size);
 
     UserDto addNewUser(NewUserRequest newUserRequest);
 
-    boolean deleteUser(Long userId);
+    boolean deleteUserById(Long userId);
 
     CategoryDto createCategory(NewCategoryDto newCategoryDto);
 
-    boolean deleteById(long id);
+    boolean deleteCategoryById(long catId);
 
-    CategoryDto updateCategoryName(long id, NewCategoryDto newCategoryDto);
+    CategoryDto updateCategoryName(long id, CategoryDto categoryDto);
 
-    EventFullDto findAllEvents(List<Integer> users, List<String> states, List<Integer> categories,
-                                   LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size);
+    List<EventFullDto> findAllEvents(List<Long> users, List<String> states, List<Long> categories,
+                                     LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size);
 
-    void updateEventById(UpdateEventAdminRequest updateEventAdminRequest);
+    EventFullDto updateEventById(UpdateEventAdminRequest updateEventAdminRequest, long eventId);
 
+    CompilationDto createNewCompilation(NewCompilationDto newCompilationDto);
 
-    void createNewCompilation(NewCompilationDto newCompilationDto);
+    boolean deleteCompilation(long compId);
 
-    boolean deleteCompilation(long id);
+    CompilationDto updateCompilationById(UpdateCompilationRequest updateCompilationRequest, long compId);
 
-    CompilationDto updateCompilationById(UpdateCompilationRequest updateCompilationRequest);
 }

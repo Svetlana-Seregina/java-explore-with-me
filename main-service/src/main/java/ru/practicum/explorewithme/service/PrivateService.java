@@ -1,26 +1,34 @@
 package ru.practicum.explorewithme.service;
 
-import ru.practicum.explorewithme.dto.ParticipationRequestDto;
-import ru.practicum.explorewithme.dto.event.*;
+import ru.practicum.explorewithme.dto.event.EventFullDto;
+import ru.practicum.explorewithme.dto.event.EventShortDto;
+import ru.practicum.explorewithme.dto.event.NewEventDto;
+import ru.practicum.explorewithme.dto.event.UpdateEventUserRequest;
+import ru.practicum.explorewithme.dto.request.EventRequestStatusUpdateRequest;
+import ru.practicum.explorewithme.dto.request.EventRequestStatusUpdateResult;
+import ru.practicum.explorewithme.dto.request.ParticipationRequestDto;
 
 import java.util.List;
 
 public interface PrivateService {
-    EventShortDto findEventByUser(long id, Integer from, Integer size);
+
+    List<EventShortDto> findAllEventsByInitiator(long id, Integer from, Integer size);
 
     EventFullDto createNewEvent(long userId, NewEventDto newEventDto);
 
-    EventFullDto findEventByUser(long userId, long eventId);
+    EventFullDto findEventByInitiator(long userId, long eventId);
 
-    EventFullDto updateEventByUser(long userId, long eventId, UpdateEventUserRequest updateEventUserRequest);
+    EventFullDto updateEventByInitiator(long userId, long eventId, UpdateEventUserRequest updateEventUserRequest);
 
-    List<ParticipationRequestDto> findAllEventRequestsByUser(long userId, long eventId);
+    List<ParticipationRequestDto> findAllEventRequestsByInitiator(long userId, long eventId);
 
-    List<EventRequestStatusUpdateResult> updateRequestStatus(long userId, long eventId, EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest);
+    EventRequestStatusUpdateResult updateRequestStatusByInitiator(long userId, long eventId,
+                                                                  EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest);
 
-    List<ParticipationRequestDto> getRequestsByUser(long userId);
+    List<ParticipationRequestDto> getOwnRequestsByRequester(long userId);
 
-    ParticipationRequestDto createRequestByUser(long userId);
+    ParticipationRequestDto createRequestByRequester(long userId, long eventId);
 
-    ParticipationRequestDto cancelEventRequestByUser(long userId, long requestId);
+    ParticipationRequestDto cancelEventRequestByRequester(long userId, long requestId);
+
 }

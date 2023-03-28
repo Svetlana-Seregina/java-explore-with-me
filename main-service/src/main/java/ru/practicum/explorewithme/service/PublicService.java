@@ -12,14 +12,16 @@ public interface PublicService {
 
     List<CompilationDto> findAllCompilations(Boolean pinned, Integer from, Integer size);
 
-    List<CompilationDto> findCompilationsById(long id);
+    CompilationDto findCompilationById(long compId);
 
     List<CategoryDto> findAllCategories(Integer from, Integer size);
 
     CategoryDto findCategoryById(long catId);
 
-    List<EventShortDto> findAllEvents(String text, List<Integer> categories, Boolean paid, LocalDateTime rangeStart,
-                                      LocalDateTime rangeEnd, Boolean onlyAvailable, String sort, Integer from, Integer size);
+    List<EventShortDto> findAllEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
+                                      LocalDateTime rangeEnd, Boolean onlyAvailable, String sort, Integer from, Integer size,
+                                      String path);
 
-    EventFullDto findEventById(long id);
+    EventFullDto findEventById(long id, String path);
+
 }

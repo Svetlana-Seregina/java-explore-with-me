@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 import java.util.Map;
 
-@RestControllerAdvice
+//@RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
 

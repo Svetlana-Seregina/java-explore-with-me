@@ -15,8 +15,9 @@ public class MapperEndpointHit {
         endpointHit.setApp(app);
         endpointHit.setUri(endpointHitDto.getUri());
         endpointHit.setIp(endpointHitDto.getIp());
-        LocalDateTime timestamp = getLocalDateTime(endpointHitDto.getTimestamp());
-        endpointHit.setTimestamp(timestamp);
+        endpointHit.setTimestamp(endpointHitDto.getTimestamp());
+        //LocalDateTime timestamp = getLocalDateTime(endpointHitDto.getTimestamp());
+        //endpointHit.setTimestamp(timestamp);
         return endpointHit;
     }
 

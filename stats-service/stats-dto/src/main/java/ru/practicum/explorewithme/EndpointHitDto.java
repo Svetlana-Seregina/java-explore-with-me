@@ -1,17 +1,22 @@
 package ru.practicum.explorewithme;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EndpointHitDto {
     @NotBlank
-    private final String app;
+    private String app;
     @NotBlank
-    private final String uri;
+    private String uri;
     @NotBlank
-    private final String ip;
+    private String ip;
     @NotBlank
-    private final String timestamp;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime timestamp;
 }

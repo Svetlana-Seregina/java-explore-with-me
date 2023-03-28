@@ -13,4 +13,5 @@ public class UserMapper {
         userDto.setEmail(newUserRequest.getEmail());
         return userDto;
     }
+
 }

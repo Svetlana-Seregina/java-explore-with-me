@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS users, categories, locations, events, compilation, participation_request;
+DROP TABLE IF EXISTS users, categories, locations, events, compilation, list_of_entities, participation_request CASCADE;
 
 CREATE TABLE IF NOT EXISTS users
 (
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS events
     request_moderation BOOLEAN,
     state              VARCHAR(50),
     title              VARCHAR(120),
-    view               BIGINT,
+    views               BIGINT,
     CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users (id),
     CONSTRAINT fk_category_id FOREIGN KEY (category_id) REFERENCES categories (id),
     CONSTRAINT fk_location_id FOREIGN KEY (location_id) REFERENCES locations (id)
@@ -50,9 +50,18 @@ CREATE TABLE IF NOT EXISTS compilation
     id       BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     event_id BIGINT,
     pinned   BOOLEAN,
-    title    VARCHAR(512) NOT NULL,
+    title    VARCHAR(512),
     CONSTRAINT fk_event_id FOREIGN KEY (event_id) REFERENCES events (id)
 );
+
+CREATE TABLE IF NOT EXISTS list_of_entities
+(
+    compilation_id  BIGINT,
+    events_id       BIGINT,
+    CONSTRAINT fk_event_id FOREIGN KEY (events_id) REFERENCES events (id),
+    CONSTRAINT fk_compilation_id FOREIGN KEY (compilation_id) REFERENCES compilation (id)
+);
+
 
 CREATE TABLE IF NOT EXISTS participation_request
 (
@@ -60,7 +69,7 @@ CREATE TABLE IF NOT EXISTS participation_request
     created  TIMESTAMP WITHOUT TIME ZONE,
     event_id BIGINT,
     user_id  BIGINT,
-    status   VARCHAR(20),
+    status   VARCHAR(50),
     CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users (id),
     CONSTRAINT fk_event_id FOREIGN KEY (event_id) REFERENCES events (id)
 );

@@ -19,25 +19,28 @@ public class BaseClient {
 
 
     protected <T> ResponseEntity<Object> post(String path, T body) {
-        return makeAndSendRequest(HttpMethod.POST, path, null, body);
+        return makeAndSendRequest(HttpMethod.POST, path, body);
     }
 
-    protected ResponseEntity<Object> get(String path, @Nullable Map<String, Object> parameters) {
+    /*protected ResponseEntity<Object> get(String path, @Nullable Map<String, Object> parameters) {
         return makeAndSendRequest(HttpMethod.GET, path, parameters, null);
-    }
+    }*/
 
-    private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String, Object> parameters, @Nullable T body) {
+    private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method,
+                                                          String path,
+                                                          //@Nullable Map<String, Object> parameters,
+                                                          @Nullable T body) {
         HttpEntity<T> requestEntity = new HttpEntity<>(body, defaultHeaders());
 
         ResponseEntity<Object> statsServerResponse;
         try {
-            if (parameters != null) {
+            /*if (parameters != null) {
                 statsServerResponse = rest.exchange(path, method, requestEntity, Object.class, parameters);
-            } else {
+            } else {*/
                 statsServerResponse = rest.exchange(path, method, requestEntity, Object.class);
                 log.info("statsServerResponse : {}", statsServerResponse);
 
-            }
+           // }
         } catch (HttpStatusCodeException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
         }
@@ -46,7 +49,7 @@ public class BaseClient {
 
 
 
-    private HttpHeaders defaultHeaders() {
+    protected HttpHeaders defaultHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));

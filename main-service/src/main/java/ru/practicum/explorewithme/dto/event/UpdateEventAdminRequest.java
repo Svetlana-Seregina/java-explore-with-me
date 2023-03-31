@@ -15,27 +15,27 @@ import java.time.LocalDateTime;
 public class UpdateEventAdminRequest {
 
     @Size(min = 20, max = 2000)
-    private String annotation; // Новая аннотация
+    private String annotation;
 
-    private Long category; // Новая категория
+    private Long category;
 
     @Size(min = 20, max = 7000)
-    private String description; // Новое описание
+    private String description;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime eventDate; // Новые дата и время на которые намечено событие. Дата и время указываются в формате "yyyy-MM-dd HH:mm:ss"
+    private LocalDateTime eventDate;
 
     private Location location;
 
-    private Boolean paid; // Новое значение флага о платности мероприятия
+    private Boolean paid;
 
-    private Long participantLimit; // Новый лимит пользователей
+    private Long participantLimit;
 
-    private Boolean requestModeration; // Нужна ли пре-модерация заявок на участие
+    private Boolean requestModeration;
 
-    private String stateAction; // Новое состояние события
+    private String stateAction;
 
     @Size(min = 3, max = 120)
-    private String title; // Новый заголовок: maxLength: 120; minLength: 3;
+    private String title;
 
 }

@@ -39,8 +39,7 @@ public class ErrorHandler {
 
         String message = String.format("Field: %s. Error: %s. Value: %s",
                 e.getFieldError().getField(), e.getFieldError().getDefaultMessage(), e.getCause());
-        /*ApiError apiError = new ApiError(errors, HttpStatus.BAD_REQUEST, "Incorrectly made request.", message,
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));*/
+
         ApiError apiError = new ApiError(errors, HttpStatus.BAD_REQUEST, "Incorrectly made request.", message,
                 LocalDateTime.now());
 

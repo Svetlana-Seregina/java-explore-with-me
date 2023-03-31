@@ -12,27 +12,27 @@ import java.time.LocalDateTime;
 public class UpdateEventUserRequest {
 
     @Size(min = 20, max = 2000)
-    private final String annotation; // Новая аннотация
+    private final String annotation;
 
-    private final CategoryDto category; // Новая категория
+    private final CategoryDto category;
 
     @Size(min = 20, max = 7000)
-    private final String description; // Новое описание
+    private final String description;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private final LocalDateTime eventDate; // Новые дата и время на которые намечено событие
+    private final LocalDateTime eventDate;
 
     private final Location location;
 
-    private final Boolean paid; // Новое значение флага о платности мероприятия
+    private final Boolean paid;
 
-    private final Long participantLimit; // Новый лимит пользователей
+    private final Long participantLimit;
 
-    private final Boolean requestModeration; // Нужна ли пре-модерация заявок на участие
+    private final Boolean requestModeration;
 
     private final String stateAction; // Изменение сотояния события: SEND_TO_REVIEW, CANCEL_REVIEW
 
     @Size(min = 3, max = 120)
-    private final String title; // Новый заголовок
+    private final String title;
 
 }

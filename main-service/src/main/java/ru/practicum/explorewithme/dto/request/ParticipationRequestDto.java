@@ -9,14 +9,14 @@ import java.time.LocalDateTime;
 public class ParticipationRequestDto {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private final LocalDateTime created; // Дата и время создания заявки, example "2022-09-06T21:10:05.432"
+    private final LocalDateTime created;
 
-    private final Long event; // Идентификатор события
+    private final Long event;
 
-    private final Long id; // Идентификатор заявки
+    private final Long id;
 
-    private final Long requester; // Идентификатор пользователя, отправившего заявку
+    private final Long requester;
 
-    private final String status; // Статус заявки EventRequestStatus
+    private final String status;
 
 }

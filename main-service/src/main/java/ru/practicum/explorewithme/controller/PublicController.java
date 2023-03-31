@@ -2,7 +2,6 @@ package ru.practicum.explorewithme.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.client.utils.URIBuilder;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +19,9 @@ import ru.practicum.explorewithme.exception.EntityNotFoundException;
 import ru.practicum.explorewithme.service.PublicService;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -84,11 +81,9 @@ public class PublicController {
         String path = request.getRequestURI();
         List<EventShortDto> eventShortDtos = publicService.findAllEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, path);
 
-        List<Long> uriIds = eventShortDtos.stream().map(EventShortDto::getId).collect(Collectors.toList());
-
         List<String> uris = new ArrayList<>();
-        for (Long id : uriIds) {
-            String uri = request.getRequestURI() + "/" + id;
+        for (EventShortDto event : eventShortDtos) {
+            String uri = request.getRequestURI() + "/" + event.getId();
             uris.add(uri);
         }
 
@@ -109,16 +104,16 @@ public class PublicController {
     @GetMapping("/events/{id}")
     public EventFullDto findEventById(@PathVariable long id, HttpServletRequest request) {
         log.info("Обрабатываем запрос на поиск события по id = {}", id);
-        log.info("client ip: {}", request.getRemoteAddr());
-        log.info("endpoint path: {}", request.getRequestURI());
-        String app = "ewm-main-service";
         String ip = request.getRemoteAddr();
+        log.info("client ip: {}", ip);
         String path = request.getRequestURI();
+        log.info("endpoint path: {}", path);
+        String app = "ewm-main-service";
+
         EventFullDto eventFullDto = publicService.findEventById(id, path);
 
         EndpointHitDto endpointHitDto = new EndpointHitDto(app, path, ip, LocalDateTime.now());
         log.info("Передаем endpointHitDto в statsClient: {}", endpointHitDto);
-
         statsClient.save(endpointHitDto);
         return eventFullDto;
     }

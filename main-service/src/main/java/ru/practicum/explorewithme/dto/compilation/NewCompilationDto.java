@@ -8,11 +8,11 @@ import java.util.List;
 @Data
 public class NewCompilationDto {
 
-    private final List<Long> events; // Список идентификаторов событий входящих в подборку
+    private final List<Long> events;
 
-    private final Boolean pinned; // Закреплена ли подборка на главной странице сайта
+    private final Boolean pinned;
 
     @NotBlank
-    private final String title; // Заголовок подборки
+    private final String title;
 
 }

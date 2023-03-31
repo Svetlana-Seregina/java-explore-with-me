@@ -36,6 +36,6 @@ public class StatsController {
         List<ViewStats> viewStats = statsService.getStats(start, end, uris, unique);
         log.info("Получен ответ statsService.getStats(start, end, uris, unique); = {}", viewStats);
         return viewStats;
-        //return List.of(new ViewStats("app", "uri", 5L));
     }
+
 }

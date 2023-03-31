@@ -7,10 +7,10 @@ import java.util.List;
 @Data
 public class UpdateCompilationRequest {
 
-    private final List<Long> events; // Список id событий подборки для полной замены текущего списка
+    private final List<Long> events;
 
-    private final Boolean pinned; // Закреплена ли подборка на главной странице сайта
+    private final Boolean pinned;
 
-    private final String title; // Заголовок подборки
+    private final String title;
 
 }

@@ -30,7 +30,28 @@ public class EventMapper {
         return event;
     }
 
-    public static EventFullDto toEventFullDto(Event event, Long confirmedRequests) {
+    public static EventFullDto toEventFullDto(Event event) {
+        return new EventFullDto(
+                event.getAnnotation(),
+                event.getCategory(),
+                event.getConfirmedRequests(),
+                event.getCreatedOn(),
+                event.getDescription(),
+                event.getEventDate(),
+                event.getId(),
+                new UserShortDto(event.getInitiator().getId(), event.getInitiator().getName()),
+                new EventFullDto.Location(event.getLocation().getLat(), event.getLocation().getLon()),
+                event.getPaid(),
+                event.getParticipantLimit(),
+                event.getPublishedOn(),
+                event.getRequestModeration(),
+                event.getState(),
+                event.getTitle(),
+                event.getViews()
+        );
+    }
+
+    public static EventFullDto toEventFullDto(Event event, Long confirmedRequests, Long views) {
         return new EventFullDto(
                 event.getAnnotation(),
                 event.getCategory(),
@@ -47,28 +68,49 @@ public class EventMapper {
                 event.getRequestModeration(),
                 event.getState(),
                 event.getTitle(),
-                event.getViews()
+                views
         );
     }
 
-    public static EventFullDto toEventFullDto(Event event) {
+    public static EventFullDto toEventFullDto(EventFullDto eventFullDto, Long confirmedRequests, Long views) {
         return new EventFullDto(
-                event.getAnnotation(),
-                event.getCategory(),
-                event.getConfirmedRequests(), // private Long confirmedRequests; // Количество одобренных заявок на участие в данном событии
-                event.getCreatedOn(),
-                event.getDescription(),
-                event.getEventDate(),
-                event.getId(),
-                new UserShortDto(event.getInitiator().getId(), event.getInitiator().getName()),
-                new EventFullDto.Location(event.getLocation().getLat(), event.getLocation().getLon()),
-                event.getPaid(),
-                event.getParticipantLimit(),
-                event.getPublishedOn(),
-                event.getRequestModeration(),
-                event.getState(),
-                event.getTitle(),
-                event.getViews()// private Long views; // Количество просмотров события
+                eventFullDto.getAnnotation(),
+                eventFullDto.getCategory(),
+                confirmedRequests,
+                eventFullDto.getCreatedOn(),
+                eventFullDto.getDescription(),
+                eventFullDto.getEventDate(),
+                eventFullDto.getId(),
+                new UserShortDto(eventFullDto.getInitiator().getId(), eventFullDto.getInitiator().getName()),
+                new EventFullDto.Location(eventFullDto.getLocation().getLat(), eventFullDto.getLocation().getLon()),
+                eventFullDto.getPaid(),
+                eventFullDto.getParticipantLimit(),
+                eventFullDto.getPublishedOn(),
+                eventFullDto.getRequestModeration(),
+                eventFullDto.getState(),
+                eventFullDto.getTitle(),
+                views
+        );
+    }
+
+    public static EventFullDto toEventFullDtoWithViews(EventFullDto eventFullDto, Long views) {
+        return new EventFullDto(
+                eventFullDto.getAnnotation(),
+                eventFullDto.getCategory(),
+                eventFullDto.getConfirmedRequests(),
+                eventFullDto.getCreatedOn(),
+                eventFullDto.getDescription(),
+                eventFullDto.getEventDate(),
+                eventFullDto.getId(),
+                new UserShortDto(eventFullDto.getInitiator().getId(), eventFullDto.getInitiator().getName()),
+                new EventFullDto.Location(eventFullDto.getLocation().getLat(), eventFullDto.getLocation().getLon()),
+                eventFullDto.getPaid(),
+                eventFullDto.getParticipantLimit(),
+                eventFullDto.getPublishedOn(),
+                eventFullDto.getRequestModeration(),
+                eventFullDto.getState(),
+                eventFullDto.getTitle(),
+                views
         );
     }
 
@@ -76,7 +118,7 @@ public class EventMapper {
         return new EventShortDto(
                 event.getAnnotation(),
                 event.getCategory(),
-                event.getConfirmedRequests(), // confirmedRequests
+                event.getConfirmedRequests(),
                 event.getEventDate(),
                 event.getId(),
                 new UserShortDto(event.getInitiator().getId(), event.getInitiator().getName()),
@@ -90,13 +132,27 @@ public class EventMapper {
         return new EventShortDto(
                 eventShortDto.getAnnotation(),
                 eventShortDto.getCategory(),
-                confirmedRequests, // confirmedRequests
+                confirmedRequests,
                 eventShortDto.getEventDate(),
                 eventShortDto.getId(),
                 new UserShortDto(eventShortDto.getInitiator().getId(), eventShortDto.getInitiator().getName()),
                 eventShortDto.getPaid(),
                 eventShortDto.getTitle(),
                 eventShortDto.getViews()
+        );
+    }
+
+    public static EventShortDto toEventShortDtoWithViews(EventShortDto eventShortDto, Long views) {
+        return new EventShortDto(
+                eventShortDto.getAnnotation(),
+                eventShortDto.getCategory(),
+                eventShortDto.getConfirmedRequests(),
+                eventShortDto.getEventDate(),
+                eventShortDto.getId(),
+                new UserShortDto(eventShortDto.getInitiator().getId(), eventShortDto.getInitiator().getName()),
+                eventShortDto.getPaid(),
+                eventShortDto.getTitle(),
+                views
         );
     }
 }

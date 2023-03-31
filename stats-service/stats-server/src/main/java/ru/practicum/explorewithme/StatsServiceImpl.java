@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -35,19 +34,28 @@ public class StatsServiceImpl implements StatsService {
         if (unique) {
             if (uris.isEmpty()) {
                 List<ViewStats> viewStats1 = endpointHitRepository.findViewStatsWhenUrisIsEmptyAndIpIsUnique(start, end);
-
                 log.info("Найдены просмотры в БД, viewStats1 = {}", viewStats1);
                 return viewStats1;
-            } else {
-                List<ViewStats> viewStats2 = endpointHitRepository.findViewStatsWhenUrisIsNotEmptyAndIpIsUnique(start, end, uris);
+            }
+            if (uris.get(0).equals("/events")) {
+                List<ViewStats> viewStats2 = endpointHitRepository.findViewStatsWhenUrisIsEventsAndIpIsUnique(start, end);
                 log.info("Найдены просмотры в БД, viewStats2 = {}", viewStats2);
                 return viewStats2;
+            } else {
+                List<ViewStats> viewStats3 = endpointHitRepository.findViewStatsWhenUrisIsNotEmptyAndIpIsUnique(start, end, uris);
+                log.info("Найдены просмотры в БД, viewStats3 = {}", viewStats3);
+                return viewStats3;
             }
         } else {
             if (uris.isEmpty()) {
                 List<ViewStats> viewStats3 = endpointHitRepository.findViewStatsWhenUrisIsEmptyAndIpIsNotUnique(start, end);
                 log.info("Найдены просмотры в БД, viewStats3 = {}", viewStats3);
                 return viewStats3;
+            }
+            if (uris.get(0).equals("/events")) {
+                List<ViewStats> viewStats5 = endpointHitRepository.findViewStatsWhenUrisIsEventsAndIpIsNotUnique(start, end);
+                log.info("Найдены просмотры в БД, viewStats5 = {}", viewStats5);
+                return viewStats5;
             } else {
                 List<ViewStats> viewStats4 = endpointHitRepository.findViewStatsWhenUrisIsNotEmptyAndIpIsNotUnique(start, end, uris);
                 log.info("Найдены просмотры в БД, viewStats4 = {}", viewStats4);

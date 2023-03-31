@@ -10,10 +10,10 @@ public class CompilationDto {
 
     private final List<EventShortDto> events;
 
-    private final Long id; // Идентификатор
+    private final Long id;
 
-    private final Boolean pinned; // Закреплена ли подборка на главной странице сайта
+    private final Boolean pinned;
 
-    private final String title; // Заголовок подборки
+    private final String title;
 
 }

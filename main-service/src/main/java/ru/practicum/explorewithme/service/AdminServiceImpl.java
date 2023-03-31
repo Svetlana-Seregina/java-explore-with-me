@@ -7,6 +7,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.explorewithme.StatsClient;
+import ru.practicum.explorewithme.ViewStats;
 import ru.practicum.explorewithme.dto.category.CategoryDto;
 import ru.practicum.explorewithme.dto.category.NewCategoryDto;
 import ru.practicum.explorewithme.dto.compilation.Compilation;
@@ -14,6 +16,7 @@ import ru.practicum.explorewithme.dto.compilation.CompilationDto;
 import ru.practicum.explorewithme.dto.compilation.NewCompilationDto;
 import ru.practicum.explorewithme.dto.compilation.UpdateCompilationRequest;
 import ru.practicum.explorewithme.dto.event.*;
+import ru.practicum.explorewithme.dto.request.ParticipationRequest;
 import ru.practicum.explorewithme.dto.user.NewUserRequest;
 import ru.practicum.explorewithme.dto.user.UserDto;
 import ru.practicum.explorewithme.mappers.CategoryMapper;
@@ -25,9 +28,10 @@ import ru.practicum.explorewithme.repository.*;
 import javax.persistence.EntityNotFoundException;
 import javax.xml.bind.ValidationException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @Transactional(readOnly = true)
@@ -40,7 +44,7 @@ public class AdminServiceImpl implements AdminService {
     private final CompilationRepository compilationRepository;
     private final EventRepository eventRepository;
     private final ParticipationRequestRepository participationRequestRepository;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final StatsClient statsClient;
 
     @Override
     public List<UserDto> findAllUsers(List<Long> ids, Integer from, Integer size) {
@@ -128,34 +132,99 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public List<EventFullDto> findAllEvents(List<Long> users, List<String> states, List<Long> categories,
                                             LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
-        List<UserDto> userDtoList = userRepository.findAllById(users);
-        log.info("Найдены пользователи = {}", userDtoList);
-        List<CategoryDto> categoryDtoList = categoryRepository.findAllById(categories);
-        log.info("Найдены категории = {}", categoryDtoList);
 
-        List<EventState> listOfStates = new ArrayList<>();
-        if(states != null) {
+        List<UserDto> userDtoList = null;
+        if (users != null) {
+            userDtoList = userRepository.findAllById(users);
+            log.info("Найден пользователь = {}", userDtoList);
+        }
+
+        List<EventState> listOfStates = null;
+        if (states != null) {
+            listOfStates = new ArrayList<>();
             for (String s : states) {
                 EventState eventState = EventState.valueOf(s);
+                log.info("Найден статус = {}", eventState);
                 listOfStates.add(eventState);
             }
         }
 
-        Pageable pageable = PageRequest.of(from, size);
-        List<Event> allEvents =
-                eventRepository.findAllByInitiatorInAndStateInAndEventDateIsAfterAndEventDateIsBefore(
-                        userDtoList, listOfStates, rangeStart, rangeEnd, pageable)
-                        .stream()
-                        .collect(Collectors.toList());
-        log.info("Количество найденных событий по заданным требованиям allEvents = {}", allEvents);
+        List<CategoryDto> categoryDtoList = null;
+        if (categories != null) {
+            categoryDtoList = categoryRepository.findAllById(categories);
+            log.info("Найдена категория = {}", categoryDtoList);
+        }
 
-        if (allEvents.isEmpty()) {
+        Pageable pageable = PageRequest.of(from, size);
+
+        List<Event> eventsByQuery = eventRepository.findAllByQueryAdminParams(
+                        userDtoList, listOfStates, categoryDtoList, rangeStart, rangeEnd, pageable)
+                .stream()
+                .collect(Collectors.toList());
+
+        log.info("По заданным параметрам в базе найден список с событиями: eventsByQuery = {}", eventsByQuery);
+
+        if (eventsByQuery.isEmpty()) {
             log.info("По заданным параметрам в базе ничего не найдено. Возвращаем пустой список.");
             return Collections.emptyList();
         }
-        List<EventFullDto> eventFullDtos = allEvents.stream()
+
+        List<Long> eventIds = new ArrayList<>();
+        for (Event event : eventsByQuery) {
+            Long evId = event.getId();
+            eventIds.add(evId);
+        }
+
+        Map<Long, List<ParticipationRequest>> confirmedRequestsByEventId = participationRequestRepository.findAllByEventId_In(eventIds)
+                .stream()
+                .collect(Collectors.groupingBy(b -> b.getEvent().getId(), toList()));
+        log.info("confirmedRequestsByEventId = {}", confirmedRequestsByEventId.size());
+
+        LocalDateTime publishedDate = eventsByQuery
+                .stream()
+                .min(Comparator.comparing(Event::getPublishedOn))
+                .map(Event::getPublishedOn)
+                .orElseThrow();
+
+        log.info("Самая ранняя дата в списке publishedDate = {}", publishedDate);
+
+        LocalDateTime actualDate = LocalDateTime.now();
+        log.info("Даты для поиска события: самая ранняя дата в списке publishedDate = {}; текущая дата actualDate = {}",
+                publishedDate, actualDate);
+
+        List<String> uris = new ArrayList<>();
+        for (Event event : eventsByQuery) {
+            uris.add("/events/" + event.getId());
+        }
+        Map<Long, List<ViewStats>> views = statsClient.getStats(publishedDate, actualDate, uris, false)
+                .stream()
+                .collect(Collectors.groupingBy(b -> (long) Integer.parseInt(b.getUri().substring(8)), toList()));
+
+        log.info("Получена статистика views = {}", views.entrySet());
+
+        List<EventFullDto> eventFullDtos = eventsByQuery.stream()
                 .map(EventMapper::toEventFullDto)
-                .collect(Collectors.toList());
+                .map(eventFullDto -> {
+                    if (confirmedRequestsByEventId.isEmpty()) {
+                        return eventFullDto;
+                    }
+                    List<ParticipationRequest> participationRequests = confirmedRequestsByEventId.get(eventFullDto.getId());
+                    int confirmedRequests = participationRequests.size();
+                    return EventMapper.toEventFullDto(eventFullDto, (long) confirmedRequests, 0L);
+                }).map(eventFullDto -> {
+                    List<ViewStats> viewStats = views.get(eventFullDto.getId());
+                    Long allViews = 0L;
+                    if (viewStats != null) {
+                        allViews = views.get(eventFullDto.getId())
+                                .stream()
+                                .map(ViewStats::getHits)
+                                .findFirst()
+                                .get();
+                        return EventMapper.toEventFullDtoWithViews(eventFullDto, allViews);
+                    }
+                    return EventMapper.toEventFullDtoWithViews(eventFullDto, allViews);
+                })
+                .collect(toList());
         log.info("Количество найденных событий по заданным требованиям eventFullDtos = {}", eventFullDtos);
 
         return eventFullDtos;
@@ -217,7 +286,7 @@ public class AdminServiceImpl implements AdminService {
                     updateEventAdminRequest.getEventDate() : event.getEventDate());
 
             log.info("Событие обновлено = {}", event);
-            return EventMapper.toEventFullDto(event, (long) confirmedRequests);
+            return EventMapper.toEventFullDto(event, (long) confirmedRequests, 0L);
         }
 
         return EventMapper.toEventFullDto(event);
@@ -232,8 +301,7 @@ public class AdminServiceImpl implements AdminService {
 
         log.info("Количество events = {}", events.size());
         Compilation compilation = compilationRepository.save(CompilationMapper.toCompilation(newCompilationDto, events));
-        log.info("Создана подборка с id = {}", compilation.getId());
-        log.info("Полные данные подборки {}", compilation);
+        log.info("Создана подборка {}", compilation);
         List<EventShortDto> eventShortDtoList = events.stream()
                 .map(EventMapper::toEventShortDto)
                 .collect(Collectors.toList());
@@ -281,10 +349,5 @@ public class AdminServiceImpl implements AdminService {
 
         return CompilationMapper.toCompilationDto(compilation, eventShortDtoList);
     }
-
-    private LocalDateTime getLocalDateTime(String date) {
-        return LocalDateTime.parse(date, formatter);
-    }
-
 
 }

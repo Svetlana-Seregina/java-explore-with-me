@@ -18,6 +18,7 @@ public class CategoryDto {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+
     @NotBlank
     @Column(unique = true)
     String name;

@@ -59,7 +59,7 @@ public class Event {
     private Boolean requestModeration; // Нужна ли пре-модерация заявок на участие
 
     @Enumerated(EnumType.STRING)
-    private EventState state; // Список состояний жизненного цикла события: PUBLISH_EVENT, REJECT_EVENT
+    private EventState state; // Список состояний жизненного цикла события: PENDING, PUBLISHED, CANCELED
 
     private String title; // Заголовок
 

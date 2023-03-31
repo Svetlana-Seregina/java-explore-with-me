@@ -16,27 +16,27 @@ public class NewEventDto {
     @Size(min = 20, max = 2000)
     private String annotation;
 
-    private Long category; // id категории к которой относится событие
+    private Long category;
 
     @NotBlank
     @Size(min = 20, max = 7000)
-    private String description; // полное описание события
+    private String description;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime eventDate; // Дата и время на которые намечено событие. Дата и время указываются в формате "yyyy-MM-dd HH:mm:ss"
+    private LocalDateTime eventDate;
 
     private Location location;
 
     private Boolean paid; // default: false; Нужно ли оплачивать участие в событии
 
-    private Long participantLimit; // Ограничение на количество участников. Значение 0 - означает отсутствие ограничения. default: 0
+    private Long participantLimit;
 
     private Boolean requestModeration; // Нужна ли пре-модерация заявок на участие.
     // Если true, то все заявки будут ожидать подтверждения инициатором события.
     // Если false - то будут подтверждаться автоматически.
 
     @Size(min = 3, max = 120)
-    private String title; // Заголовок события
+    private String title;
 
     @Data
     public static class Location {

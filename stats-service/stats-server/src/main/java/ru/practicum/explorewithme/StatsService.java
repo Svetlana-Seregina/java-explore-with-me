@@ -8,4 +8,5 @@ public interface StatsService {
     void save(EndpointHitDto endpointHitDto);
 
     List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique);
+
 }

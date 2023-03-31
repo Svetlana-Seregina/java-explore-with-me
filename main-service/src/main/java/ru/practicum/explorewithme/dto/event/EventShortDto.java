@@ -11,23 +11,23 @@ import java.time.LocalDateTime;
 public class EventShortDto {
     // Краткая информация о событии
 
-    private final String annotation; // Краткое описание
+    private final String annotation;
 
-    private final CategoryDto category; // Категория
+    private final CategoryDto category;
 
-    private final Long confirmedRequests; // Количество одобренных заявок на участие в данном событии
+    private final Long confirmedRequests;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private final LocalDateTime eventDate; // Дата и время на которые намечено событие (в формате "yyyy-MM-dd HH:mm:ss")
+    private final LocalDateTime eventDate;
 
-    private final Long id; // Идентификатор
+    private final Long id;
 
-    private final UserShortDto initiator; // Пользователь (краткая информация)
+    private final UserShortDto initiator;
 
-    private final Boolean paid; // Нужно ли оплачивать участие
+    private final Boolean paid;
 
-    private final String title; // Заголовок
+    private final String title;
 
-    private final Long views; // Количество просмотров события
+    private final Long views;
 
 }

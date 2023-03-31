@@ -14,36 +14,36 @@ public class EventFullDto {
 
     private final CategoryDto category;
 
-    private final Long confirmedRequests; // Количество одобренных заявок на участие в данном событии
+    private final Long confirmedRequests;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private final LocalDateTime createdOn; // Дата и время создания события (в формате "yyyy-MM-dd HH:mm:ss")
+    private final LocalDateTime createdOn;
 
     private final String description;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private final LocalDateTime eventDate; // Дата и время на которые намечено событие (в формате "yyyy-MM-dd HH:mm:ss")
+    private final LocalDateTime eventDate;
 
-    private final Long id; // Идентификатор
+    private final Long id;
 
     private final UserShortDto initiator;
 
     private final Location location;
 
-    private final Boolean paid; // Нужно ли оплачивать участие
+    private final Boolean paid;
 
-    private final Long participantLimit; // Ограничение на количество участников. Значение 0 - означает отсутствие ограничения
+    private final Long participantLimit;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    private final LocalDateTime publishedOn; // Дата и время публикации события (в формате "yyyy-MM-dd HH:mm:ss")
+    private final LocalDateTime publishedOn;
 
-    private final Boolean requestModeration; // Нужна ли пре-модерация заявок на участие
+    private final Boolean requestModeration;
 
-    private final EventState state; // Список состояний жизненного цикла события: PENDING, PUBLISHED, CANCELED
+    private final EventState state;
 
-    private final String title; // Заголовок
+    private final String title;
 
-    private final Long views; // Количество просмотрев события
+    private final Long views;
 
     @Data
     public static class Location {

@@ -102,5 +102,6 @@ public class PrivateController {
         log.info("Обрабатываем запрос на отмену своего участия в событии от userId = {} событие requestId = {}", userId, requestId);
         return privateService.cancelEventRequestByRequester(userId, requestId);
     }
+
 }
 

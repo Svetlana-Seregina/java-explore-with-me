@@ -23,7 +23,7 @@ public class Compilation {
 
     @ElementCollection
     @CollectionTable(name = "listOfEntities")
-    private Set<Event> events = new HashSet<>();
+    private Set<Event> events = new HashSet<>(); // Список идентификаторов событий входящих в подборку
 
     private Boolean pinned; // Закреплена ли подборка на главной странице сайта
 

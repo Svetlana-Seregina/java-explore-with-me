@@ -296,7 +296,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public CompilationDto createNewCompilation(NewCompilationDto newCompilationDto) {
         List<Long> eventIds = newCompilationDto.getEvents();
-        if(eventIds.isEmpty()) {
+        if (eventIds.isEmpty()) {
             Compilation compilation = compilationRepository.save(CompilationMapper.toCompilation(newCompilationDto, Collections.emptyList()));
             log.info("Создана подборка {}", compilation);
             CompilationDto compilationDto = CompilationMapper.toCompilationDto(compilation, Collections.emptyList());
@@ -339,7 +339,7 @@ public class AdminServiceImpl implements AdminService {
         List<Long> eventIds = updateCompilationRequest.getEvents();
         log.info("Количество eventIds: {}", eventIds);
 
-        if(eventIds.isEmpty()) {
+        if (eventIds.isEmpty()) {
             Set<Event> eventSet = new HashSet<>();
             compilation.setEvents(eventSet);
             compilation.setPinned(updateCompilationRequest.getPinned());

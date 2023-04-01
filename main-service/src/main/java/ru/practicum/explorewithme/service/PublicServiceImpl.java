@@ -214,7 +214,7 @@ public class PublicServiceImpl implements PublicService {
         log.info("РАЗМЕР СПИСКА compilationList = {}", compilationList.size());
         log.info("Полные данные подборки compilationList = {}", compilationList);
 
-        if(compilationList.isEmpty()) {
+        if (compilationList.isEmpty()) {
             return Collections.emptyList();
         }
 

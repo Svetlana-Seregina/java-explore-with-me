@@ -214,15 +214,12 @@ public class PublicServiceImpl implements PublicService {
         log.info("РАЗМЕР СПИСКА compilationList = {}", compilationList.size());
         log.info("Полные данные подборки compilationList = {}", compilationList);
 
-
-        List<EventShortDto> eventShortDtoList = compilationList.stream()
-                .flatMap(ev -> ev.getEvents().stream()
-                        .map(EventMapper::toEventShortDto))
-                .collect(Collectors.toList());
-        log.info("РАЗМЕР СПИСКА eventShortDtoList = {}", compilationList.size());
+        if(compilationList.isEmpty()) {
+            return Collections.emptyList();
+        }
 
         List<CompilationDto> compilationDtoList = compilationList.stream()
-                .map(c -> CompilationMapper.toCompilationDto(c, eventShortDtoList))
+                .map(CompilationMapper::toCompilationDto)
                 .collect(Collectors.toList());
         log.info("РАЗМЕР СПИСКА compilationDtoList = {}", compilationDtoList.size());
         return compilationDtoList;

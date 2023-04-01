@@ -22,20 +22,20 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByCategory(CategoryDto categoryDto);
 
     @Query(value = "SELECT e FROM Event AS e " +
-            "WHERE (:users IS NULL OR e.initiator IN :users) " +
-            "AND (:states IS NULL OR e.state IN :states) " +
-            "AND (:categories IS NULL OR e.category IN :categories) " +
+            "WHERE (COALESCE(:users) IS NULL OR e.initiator IN :users) " +
+            "AND (COALESCE(:states) IS NULL OR e.state IN :states) " +
+            "AND (COALESCE(:categories) IS NULL OR e.category IN :categories) " +
             "AND (DATE(:rangeStart) IS NULL OR e.eventDate > cast(:rangeStart as date)) " +
             "AND (DATE(:rangeEnd) IS NULL OR e.eventDate < cast(:rangeEnd as date))")
-    Page<Event> findAllByQueryAdminParams(@Param("users")List<UserDto> users, @Param("states") List<EventState> states,
-                                     @Param("categories") List<CategoryDto> categories,
-                                     @Param("rangeStart") LocalDateTime rangeStart, @Param("rangeEnd") LocalDateTime rangeEnd,
-                                     Pageable pageable);
+    Page<Event> findAllByQueryAdminParams(@Param("users") List<UserDto> users, @Param("states") List<EventState> states,
+                                          @Param("categories") List<CategoryDto> categories,
+                                          @Param("rangeStart") LocalDateTime rangeStart, @Param("rangeEnd") LocalDateTime rangeEnd,
+                                          Pageable pageable);
 
     @Query(value = "SELECT e FROM Event AS e " +
             "WHERE (:text IS NULL OR UPPER(e.annotation) LIKE CONCAT('%',UPPER(:text),'%')) " +
             "OR (:text IS NULL OR UPPER(e.description) LIKE CONCAT('%', UPPER(:text), '%')) " +
-            "AND (:categories IS NULL OR e.category IN :categories) " +
+            "AND (COALESCE(:categories) IS NULL OR e.category IN :categories) " +
             "AND (:paid IS NULL OR e.paid = :paid) " +
             "AND (DATE(:rangeStart) IS NULL OR e.eventDate > cast(:rangeStart as date)) " +
             "AND (DATE(:rangeEnd) IS NULL OR e.eventDate < cast(:rangeEnd as date)) " +

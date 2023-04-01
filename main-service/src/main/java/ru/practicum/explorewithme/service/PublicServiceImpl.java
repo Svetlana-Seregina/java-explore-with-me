@@ -144,15 +144,16 @@ public class PublicServiceImpl implements PublicService {
                 })
                 .map(eventShortDto -> {
                     List<ViewStats> viewStats = views.get(eventShortDto.getId());
+                    Long allViews = 0L;
                     if (viewStats != null) {
-                        Long allViews = views.get(eventShortDto.getId())
+                        allViews = views.get(eventShortDto.getId())
                                 .stream()
                                 .map(ViewStats::getHits)
                                 .findFirst()
                                 .get();
                         return EventMapper.toEventShortDtoWithViews(eventShortDto, allViews);
                     }
-                    return eventShortDto;
+                    return EventMapper.toEventShortDtoWithViews(eventShortDto, allViews);
                 })
                 .collect(toList());
         log.info("eventShortDtoList = {}", eventShortDtoList);
@@ -189,17 +190,17 @@ public class PublicServiceImpl implements PublicService {
 
         List<String> uris = new ArrayList<>();
         uris.add(path);
-        List<ViewStats> views = statsClient.getStats(publishedDate, actualDate, uris, false);
-        log.info("Найдены просмотры события views = {}", views.size());
-        Long hits = null;
-        if (views.size() > 0) {
-            hits = views.get(0).getHits();
+        List<ViewStats> viewStats = statsClient.getStats(publishedDate, actualDate, uris, false);
+        log.info("Найдены просмотры события views = {}", viewStats.size());
+        Long views = null;
+        if (viewStats.size() > 0) {
+            views = viewStats.get(0).getHits();
         }
-        if (views.size() == 0) {
-            hits = 0L;
+        if (viewStats.size() == 0) {
+            views = 0L;
         }
 
-        EventFullDto eventFullDto = EventMapper.toEventFullDto(event, (long) confirmedRequests, hits);
+        EventFullDto eventFullDto = EventMapper.toEventFullDto(event, (long) confirmedRequests, views);
         log.info("Найдено событие по id = {}; EVENT = {}", id, eventFullDto);
 
         return eventFullDto;

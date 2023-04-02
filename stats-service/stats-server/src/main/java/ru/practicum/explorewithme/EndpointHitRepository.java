@@ -14,7 +14,7 @@ public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> 
             "INNER JOIN Application AS a on ep.app.id = a.id " +
             "WHERE ep.timestamp BETWEEN ?1 AND ?2 " +
             "GROUP BY a.name, ep.uri " +
-            "ORDER BY COUNT(distinct ep.uri) desc ")
+            "ORDER BY COUNT(ep.uri) desc ")
     List<ViewStats> findViewStatsWhenUrisIsEmptyAndIpIsUnique(LocalDateTime start, LocalDateTime end);
 
     @Query(value = "SELECT " +

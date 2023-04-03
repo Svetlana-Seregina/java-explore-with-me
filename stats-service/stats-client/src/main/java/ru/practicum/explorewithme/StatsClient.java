@@ -41,13 +41,13 @@ public class StatsClient extends BaseClient {
         Map<String, Object> parameters = Map.of(
                 "start", start.format(formatter),
                 "end", end.format(formatter),
-                "uris", uris,
+                "uris", String.join(",", uris),
                 "unique", unique
         );
 
         HttpEntity<Object> requestEntity = new HttpEntity<>(null, defaultHeaders());
 
-        ResponseEntity<ViewStats[]> statsServerResponse = rest.exchange("/stats?start={start}&end={end}&uris={uris}&{unique}=unique",
+        ResponseEntity<ViewStats[]> statsServerResponse = rest.exchange("/stats?start={start}&end={end}&uris={uris}&unique={unique}",
                     HttpMethod.GET, requestEntity, ViewStats[].class, parameters);
         ViewStats[] result = statsServerResponse.getBody();
         List<ViewStats> resultList = Arrays.asList(Objects.requireNonNull(result));

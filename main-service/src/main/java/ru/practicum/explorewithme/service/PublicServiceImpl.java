@@ -107,7 +107,7 @@ public class PublicServiceImpl implements PublicService {
                 participationRequestRepository.findAllByEventIdInAndStatusIs(eventIds, EventRequestStatus.CONFIRMED)
                         .stream()
                         .collect(Collectors.groupingBy(b -> b.getEvent().getId(), toList()));
-        log.info("confirmedRequestsByEventId = {}", confirmedRequestsByEventId.entrySet());
+        log.info("confirmedRequestsByEventId.size = {}", confirmedRequestsByEventId.size());
 
         LocalDateTime publishedDate = events
                 .stream()
@@ -125,6 +125,8 @@ public class PublicServiceImpl implements PublicService {
         for (Event event : events) {
             uris.add("/events/" + event.getId());
         }
+        log.info("СПИСОК URIS = {}", uris);
+
         Map<Long, List<ViewStats>> views = statsClient.getStats(publishedDate, actualDate, uris, false)
                 .stream()
                 .collect(Collectors.groupingBy(b -> (long) Integer.parseInt(b.getUri().substring(8)), toList()));
@@ -144,19 +146,16 @@ public class PublicServiceImpl implements PublicService {
                 })
                 .map(eventShortDto -> {
                     List<ViewStats> viewStats = views.get(eventShortDto.getId());
-                    Long allViews = 0L;
+                    log.info("viewStats = {}", viewStats);
+                    Long hits = 0L;
                     if (viewStats != null) {
-                        allViews = views.get(eventShortDto.getId())
-                                .stream()
-                                .map(ViewStats::getHits)
-                                .findFirst()
-                                .get();
-                        return EventMapper.toEventShortDtoWithViews(eventShortDto, allViews);
+                        hits = viewStats.get(0).getHits();
+                        log.info("hits = {}", hits);
+                        return EventMapper.toEventShortDtoWithViews(eventShortDto, hits);
                     }
-                    return EventMapper.toEventShortDtoWithViews(eventShortDto, allViews);
+                    return EventMapper.toEventShortDtoWithViews(eventShortDto, hits);
                 })
                 .collect(toList());
-        log.info("eventShortDtoList = {}", eventShortDtoList);
 
         if (sort != null) {
             if (sort.equals("EVENT_DATE")) {

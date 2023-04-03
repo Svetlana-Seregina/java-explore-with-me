@@ -48,18 +48,18 @@ public class StatsServiceImpl implements StatsService {
             }
         } else {
             if (uris.isEmpty()) {
-                List<ViewStats> viewStats3 = endpointHitRepository.findViewStatsWhenUrisIsEmptyAndIpIsNotUnique(start, end);
-                log.info("Найдены просмотры в БД, viewStats3 = {}", viewStats3);
-                return viewStats3;
+                List<ViewStats> viewStats4 = endpointHitRepository.findViewStatsWhenUrisIsEmptyAndIpIsNotUnique(start, end);
+                log.info("Найдены просмотры в БД, viewStats4 = {}", viewStats4);
+                return viewStats4;
             }
             if (uris.get(0).equals("/events")) {
                 List<ViewStats> viewStats5 = endpointHitRepository.findViewStatsWhenUrisIsEventsAndIpIsNotUnique(start, end);
                 log.info("Найдены просмотры в БД, viewStats5 = {}", viewStats5);
                 return viewStats5;
             } else {
-                List<ViewStats> viewStats4 = endpointHitRepository.findViewStatsWhenUrisIsNotEmptyAndIpIsNotUnique(start, end, uris);
-                log.info("Найдены просмотры в БД, viewStats4 = {}", viewStats4);
-                return viewStats4;
+                List<ViewStats> viewStats6 = endpointHitRepository.findViewStatsWhenUrisIsNotEmptyAndIpIsNotUnique(start, end, uris);
+                log.info("Найдены просмотры в БД, viewStats4 = {}", viewStats6);
+                return viewStats6;
             }
         }
     }

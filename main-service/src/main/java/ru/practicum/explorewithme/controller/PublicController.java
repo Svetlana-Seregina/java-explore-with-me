@@ -83,7 +83,7 @@ public class PublicController {
 
         List<String> uris = new ArrayList<>();
         for (EventShortDto event : eventShortDtos) {
-            String uri = request.getRequestURI() + "/" + event.getId();
+            String uri = path + "/" + event.getId();
             uris.add(uri);
         }
 

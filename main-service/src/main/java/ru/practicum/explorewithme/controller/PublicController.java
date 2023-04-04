@@ -20,7 +20,6 @@ import ru.practicum.explorewithme.service.PublicService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -81,22 +80,14 @@ public class PublicController {
         String path = request.getRequestURI();
         List<EventShortDto> eventShortDtos = publicService.findAllEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, path);
 
-        List<String> uris = new ArrayList<>();
-        for (EventShortDto event : eventShortDtos) {
-            String uri = path + "/" + event.getId();
-            uris.add(uri);
-        }
-
         String app = "ewm-main-service";
         String ip = request.getRemoteAddr();
         log.info("client ip (findAllEvents): {}", ip);
-        log.info("client uri (findAllEvents): {}", uris);
 
-        for (String uri : uris) {
-            EndpointHitDto endpointHitDto = new EndpointHitDto(app, uri, ip, LocalDateTime.now());
-            log.info("Передаем endpointHitDto в statsClient: {}", endpointHitDto);
-            statsClient.save(endpointHitDto);
-        }
+        EndpointHitDto endpointHitDto = new EndpointHitDto(app, path, ip, LocalDateTime.now());
+        log.info("Передаем endpointHitDto в statsClient: {}", endpointHitDto);
+        statsClient.save(endpointHitDto);
+
         log.info("Создан список для пользователя по параметрам: {}", eventShortDtos);
 
         return eventShortDtos;

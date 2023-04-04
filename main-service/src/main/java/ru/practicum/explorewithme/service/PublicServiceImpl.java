@@ -122,9 +122,9 @@ public class PublicServiceImpl implements PublicService {
                 publishedDate, actualDate);
 
         List<String> uris = new ArrayList<>();
-            for (Event event : events) {
-                uris.add("/events/" + event.getId());
-            }
+        for (Event event : events) {
+            uris.add("/events/" + event.getId());
+        }
         log.info("СПИСОК URIS = {}", uris);
 
         Map<Long, List<ViewStats>> views = statsClient.getStats(publishedDate, actualDate, uris, false)

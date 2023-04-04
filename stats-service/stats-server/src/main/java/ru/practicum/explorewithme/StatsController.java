@@ -34,6 +34,7 @@ public class StatsController {
         log.info("Get statistics: start = {}, end = {}, uris = {}, unique = {}", start, end, uris.size(), unique);
         log.info("Get uri: uris = {}", uris);
         List<ViewStats> viewStats = statsService.getStats(start, end, uris, unique);
+
         log.info("Получен ответ statsService.getStats(start, end, uris, unique); = {}", viewStats);
         return viewStats;
     }

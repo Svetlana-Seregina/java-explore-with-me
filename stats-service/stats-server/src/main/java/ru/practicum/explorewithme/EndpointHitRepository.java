@@ -28,14 +28,6 @@ public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> 
     List<ViewStats> findViewStatsWhenUrisIsNotEmptyAndIpIsUnique(LocalDateTime start, LocalDateTime end, List<String> uris);
 
     @Query(value = "SELECT " +
-            "new ru.practicum.explorewithme.ViewStats(a.name, ep.uri, COUNT(distinct ep.uri)) " +
-            "FROM EndpointHit AS ep " +
-            "INNER JOIN Application AS a on ep.app.id = a.id " +
-            "WHERE ep.timestamp BETWEEN ?1 AND ?2 " +
-            "GROUP BY a.name, ep.uri ")
-    List<ViewStats> findViewStatsWhenUrisIsEventsAndIpIsUnique(LocalDateTime start, LocalDateTime end);
-
-    @Query(value = "SELECT " +
             "new ru.practicum.explorewithme.ViewStats(a.name, ep.uri, COUNT(ep.uri)) " +
             "FROM EndpointHit AS ep " +
             "INNER JOIN Application AS a on ep.app.id = a.id " +
@@ -53,13 +45,5 @@ public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> 
             "GROUP BY a.name, ep.uri " +
             "ORDER BY count(ep.uri) desc ")
     List<ViewStats> findViewStatsWhenUrisIsNotEmptyAndIpIsNotUnique(LocalDateTime start, LocalDateTime end, List<String> uris);
-
-    @Query(value = "SELECT " +
-            " new ru.practicum.explorewithme.ViewStats(a.name, ep.uri, COUNT(ep.uri)) " +
-            "FROM EndpointHit AS ep " +
-            "INNER JOIN Application AS a on ep.app.id = a.id " +
-            "WHERE ep.timestamp BETWEEN ?1 AND ?2 " +
-            "GROUP BY a.name, ep.uri ")
-    List<ViewStats> findViewStatsWhenUrisIsEventsAndIpIsNotUnique(LocalDateTime start, LocalDateTime end);
 
 }

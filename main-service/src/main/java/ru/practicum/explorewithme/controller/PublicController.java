@@ -97,6 +97,7 @@ public class PublicController {
             log.info("Передаем endpointHitDto в statsClient: {}", endpointHitDto);
             statsClient.save(endpointHitDto);
         }
+        log.info("Создан список для пользователя по параметрам: {}", eventShortDtos);
 
         return eventShortDtos;
     }

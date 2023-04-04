@@ -78,17 +78,16 @@ public class PublicController {
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
 
         String path = request.getRequestURI();
-        List<EventShortDto> eventShortDtos = publicService.findAllEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, path);
-
         String app = "ewm-main-service";
         String ip = request.getRemoteAddr();
-        log.info("client ip (findAllEvents): {}", ip);
 
         EndpointHitDto endpointHitDto = new EndpointHitDto(app, path, ip, LocalDateTime.now());
         log.info("Передаем endpointHitDto в statsClient: {}", endpointHitDto);
         statsClient.save(endpointHitDto);
 
-        log.info("Создан список для пользователя по параметрам: {}", eventShortDtos);
+        List<EventShortDto> eventShortDtos = publicService.findAllEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, path);
+
+        log.info("Получен список событий для пользователя по параметрам: {}", eventShortDtos);
 
         return eventShortDtos;
     }

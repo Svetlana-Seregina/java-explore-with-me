@@ -36,11 +36,10 @@ public class StatsServiceImpl implements StatsService {
                 List<ViewStats> viewStats1 = endpointHitRepository.findViewStatsWhenUrisIsEmptyAndIpIsUnique(start, end);
                 log.info("Найдены просмотры в БД, viewStats1 = {}", viewStats1);
                 return viewStats1;
-            } else {
-                List<ViewStats> viewStats3 = endpointHitRepository.findViewStatsWhenUrisIsNotEmptyAndIpIsUnique(start, end, uris);
-                log.info("Найдены просмотры в БД, viewStats3 = {}", viewStats3);
-                return viewStats3;
             }
+            List<ViewStats> viewStats3 = endpointHitRepository.findViewStatsWhenUrisIsNotEmptyAndIpIsUnique(start, end, uris);
+            log.info("Найдены просмотры в БД, viewStats3 = {}", viewStats3);
+            return viewStats3;
         } else {
             if (uris.isEmpty()) {
                 List<ViewStats> viewStats4 = endpointHitRepository.findViewStatsWhenUrisIsEmptyAndIpIsNotUnique(start, end);

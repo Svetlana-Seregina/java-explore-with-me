@@ -7,7 +7,6 @@ import ru.practicum.explorewithme.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.explorewithme.dto.request.ParticipationRequest;
 import ru.practicum.explorewithme.dto.request.ParticipationRequestDto;
 import ru.practicum.explorewithme.dto.user.User;
-import ru.practicum.explorewithme.dto.user.UserDto;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
@@ -16,6 +18,7 @@ public class NewEventDto {
     @Size(min = 20, max = 2000)
     private String annotation;
 
+    @NotNull
     private Long category;
 
     @NotBlank
@@ -27,14 +30,16 @@ public class NewEventDto {
 
     private Location location;
 
-    private Boolean paid; // default: false; Нужно ли оплачивать участие в событии
+    private boolean paid; // default: false; Нужно ли оплачивать участие в событии
 
+    @PositiveOrZero
     private Long participantLimit;
 
-    private Boolean requestModeration; // Нужна ли пре-модерация заявок на участие.
+    private boolean requestModeration; // Нужна ли пре-модерация заявок на участие.
     // Если true, то все заявки будут ожидать подтверждения инициатором события.
     // Если false - то будут подтверждаться автоматически.
 
+    @NotBlank
     @Size(min = 3, max = 120)
     private String title;
 

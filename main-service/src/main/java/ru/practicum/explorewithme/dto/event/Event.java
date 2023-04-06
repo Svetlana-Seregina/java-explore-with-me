@@ -28,9 +28,6 @@ public class Event {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @Column(name = "confirmed_requests")
-    private Long confirmedRequests; // Количество одобренных заявок на участие в данном событии
-
     @Column(name = "created_on")
     private LocalDateTime createdOn; // Дата и время создания события (в формате "yyyy-MM-dd HH:mm:ss")
 
@@ -62,7 +59,5 @@ public class Event {
     private EventState state; // Список состояний жизненного цикла события: PENDING, PUBLISHED, CANCELED
 
     private String title; // Заголовок
-
-    private Long views; // Количество просмотрев события
 
 }

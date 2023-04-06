@@ -58,7 +58,7 @@ public class ErrorHandler {
     @ExceptionHandler({MissingServletRequestParameterException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ApiError> handleMissingServletRequestParameterException(MissingServletRequestParameterException e,
-                                                                          HttpServletRequest request) {
+                                                                                  HttpServletRequest request) {
         log.warn("Отсутствует требуемый параметр запроса: {} \nПуть запроса: {}", e.getMessage(), request.getServletPath());
         ApiError apiError = new ApiError(e.toString(), HttpStatus.BAD_REQUEST, "Incorrectly made request.",
                 e.getMessage(), LocalDateTime.now());

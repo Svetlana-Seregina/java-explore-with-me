@@ -6,7 +6,6 @@ import ru.practicum.explorewithme.dto.category.Category;
 import ru.practicum.explorewithme.dto.category.CategoryDto;
 import ru.practicum.explorewithme.dto.event.*;
 import ru.practicum.explorewithme.dto.user.User;
-import ru.practicum.explorewithme.dto.user.UserDto;
 import ru.practicum.explorewithme.dto.user.UserShortDto;
 
 import java.time.LocalDateTime;
@@ -18,15 +17,14 @@ public class EventMapper {
         Event event = new Event();
         event.setAnnotation(newEventDto.getAnnotation());
         event.setCategory(category);
-        event.setConfirmedRequests(0L);
         event.setCreatedOn(LocalDateTime.now());
         event.setDescription(newEventDto.getDescription());
         event.setEventDate(newEventDto.getEventDate());
         event.setInitiator(user);
         event.setLocation(location);
-        event.setPaid(newEventDto.getPaid());
+        event.setPaid(newEventDto.isPaid());
         event.setParticipantLimit(newEventDto.getParticipantLimit());
-        event.setRequestModeration(newEventDto.getRequestModeration());
+        event.setRequestModeration(newEventDto.isRequestModeration());
         event.setState(eventState);
         event.setTitle(newEventDto.getTitle());
         return event;
@@ -36,7 +34,7 @@ public class EventMapper {
         return new EventFullDto(
                 event.getAnnotation(),
                 new CategoryDto(event.getCategory().getId(), event.getCategory().getName()),
-                event.getConfirmedRequests(),
+                0L,
                 event.getCreatedOn(),
                 event.getDescription(),
                 event.getEventDate(),
@@ -49,7 +47,7 @@ public class EventMapper {
                 event.getRequestModeration(),
                 event.getState(),
                 event.getTitle(),
-                event.getViews()
+                0L
         );
     }
 
@@ -120,13 +118,13 @@ public class EventMapper {
         return new EventShortDto(
                 event.getAnnotation(),
                 new CategoryDto(event.getCategory().getId(), event.getCategory().getName()),
-                event.getConfirmedRequests(),
+                0L,
                 event.getEventDate(),
                 event.getId(),
                 new UserShortDto(event.getInitiator().getId(), event.getInitiator().getName()),
                 event.getPaid(),
                 event.getTitle(),
-                event.getViews()
+                0L
         );
     }
 
@@ -157,4 +155,5 @@ public class EventMapper {
                 views
         );
     }
+
 }

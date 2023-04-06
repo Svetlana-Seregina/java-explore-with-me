@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import ru.practicum.explorewithme.dto.Location;
-import ru.practicum.explorewithme.dto.category.CategoryDto;
 
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
@@ -25,8 +23,6 @@ public class UpdateEventUserRequest {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
-
-    private Location location;
 
     private Boolean paid;
 

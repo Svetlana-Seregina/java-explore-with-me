@@ -5,7 +5,6 @@ import ru.practicum.explorewithme.dto.event.Event;
 import ru.practicum.explorewithme.dto.request.EventRequestStatus;
 import ru.practicum.explorewithme.dto.request.ParticipationRequest;
 import ru.practicum.explorewithme.dto.user.User;
-import ru.practicum.explorewithme.dto.user.UserDto;
 
 import java.util.List;
 import java.util.Optional;

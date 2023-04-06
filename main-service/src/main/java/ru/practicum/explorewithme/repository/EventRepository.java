@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.explorewithme.dto.category.Category;
-import ru.practicum.explorewithme.dto.category.CategoryDto;
 import ru.practicum.explorewithme.dto.event.Event;
 import ru.practicum.explorewithme.dto.event.EventState;
 import ru.practicum.explorewithme.dto.user.User;
@@ -45,6 +44,5 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                                            @Param("paid") Boolean paid, @Param("rangeStart") LocalDateTime rangeStart,
                                            @Param("rangeEnd") LocalDateTime rangeEnd, @Param("state") EventState state,
                                            Pageable pageable);
-
 
 }

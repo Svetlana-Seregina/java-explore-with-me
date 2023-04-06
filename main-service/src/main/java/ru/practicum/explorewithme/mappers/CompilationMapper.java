@@ -18,7 +18,7 @@ public class CompilationMapper {
         HashSet<Event> set = new HashSet<>(events);
         Compilation compilation = new Compilation();
         compilation.setEvents(set);
-        compilation.setPinned(newCompilationDto.getPinned());
+        compilation.setPinned(newCompilationDto.isPinned());
         compilation.setTitle(newCompilationDto.getTitle());
         return compilation;
     }
@@ -43,4 +43,5 @@ public class CompilationMapper {
                 compilation.getTitle()
         );
     }
+
 }

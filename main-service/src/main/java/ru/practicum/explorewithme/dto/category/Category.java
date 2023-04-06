@@ -20,7 +20,6 @@ public class Category {
     Long id;
 
     @NotBlank
-    @Column(unique = true)
     String name;
 
 }

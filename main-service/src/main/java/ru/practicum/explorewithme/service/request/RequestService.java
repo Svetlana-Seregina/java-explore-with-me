@@ -1,24 +1,12 @@
-package ru.practicum.explorewithme.service;
+package ru.practicum.explorewithme.service.request;
 
-import ru.practicum.explorewithme.dto.event.EventFullDto;
-import ru.practicum.explorewithme.dto.event.EventShortDto;
-import ru.practicum.explorewithme.dto.event.NewEventDto;
-import ru.practicum.explorewithme.dto.event.UpdateEventUserRequest;
 import ru.practicum.explorewithme.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.explorewithme.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.explorewithme.dto.request.ParticipationRequestDto;
 
 import java.util.List;
 
-public interface PrivateService {
-
-    List<EventShortDto> findAllEventsByInitiator(long id, Integer from, Integer size);
-
-    EventFullDto createNewEvent(long userId, NewEventDto newEventDto);
-
-    EventFullDto findEventByInitiator(long userId, long eventId);
-
-    EventFullDto updateEventByInitiator(long userId, long eventId, UpdateEventUserRequest updateEventUserRequest);
+public interface RequestService {
 
     List<ParticipationRequestDto> findAllEventRequestsByInitiator(long userId, long eventId);
 

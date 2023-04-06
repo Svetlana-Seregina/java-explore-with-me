@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Data
 @NoArgsConstructor
@@ -13,7 +13,7 @@ import javax.validation.constraints.NotBlank;
 public class NewCategoryDto {
 
     @NotBlank
-    @Column(unique = true)
+    @Size(max = 512)
     private String name;
 
 }

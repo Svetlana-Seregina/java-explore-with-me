@@ -23,4 +23,5 @@ public class UserMapper {
                 user.getEmail()
         );
     }
+
 }

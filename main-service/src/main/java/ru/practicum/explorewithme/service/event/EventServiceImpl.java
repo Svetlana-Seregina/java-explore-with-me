@@ -81,20 +81,16 @@ public class EventServiceImpl implements EventService {
             return Collections.emptyList();
         }
 
-        Map<Long, List<ParticipationRequest>> confirmedRequests = findConfirmedRequests(allEvents);
-        Map<Long, List<ViewStats>> views = findViewStats(allEvents);
-
-        return toEventShortDtoList(allEvents, confirmedRequests, views);
+        return allEvents.stream()
+                .map(EventMapper::toEventShortDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public EventFullDto findEventByInitiator(long userId, long eventId) {
         User user = findUserInRepository(userId);
         Event event = eventRepository.findByIdAndInitiator(eventId, user);
-        List<ParticipationRequest> confirmedRequests =
-                participationRequestRepository.findAllByEventIdAndStatusIs(eventId, EventRequestStatus.CONFIRMED);
-        Long views = findViews(event, "/events/" + eventId);
-        return EventMapper.toEventFullDto(event, (long) confirmedRequests.size(), views);
+        return EventMapper.toEventFullDto(event);
     }
 
     @Override
@@ -381,8 +377,14 @@ public class EventServiceImpl implements EventService {
             eventIds.add(evId);
         }
 
+        List<ParticipationRequest> confirmedRequests =
+                participationRequestRepository.findAllByEventIdInAndStatusIs(eventIds, EventRequestStatus.CONFIRMED);
+
+        if (confirmedRequests.isEmpty()) {
+            return new HashMap<>();
+        }
         Map<Long, List<ParticipationRequest>> confirmedRequestsByEventId =
-                participationRequestRepository.findAllByEventIdInAndStatusIs(eventIds, EventRequestStatus.CONFIRMED)
+                confirmedRequests
                         .stream()
                         .collect(Collectors.groupingBy(b -> b.getEvent().getId(), toList()));
         log.info("confirmedRequestsByEventId.size = {}", confirmedRequestsByEventId.size());

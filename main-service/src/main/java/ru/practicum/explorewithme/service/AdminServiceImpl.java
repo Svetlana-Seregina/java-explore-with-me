@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explorewithme.StatsClient;
 import ru.practicum.explorewithme.ViewStats;
+import ru.practicum.explorewithme.dto.category.Category;
 import ru.practicum.explorewithme.dto.category.CategoryDto;
 import ru.practicum.explorewithme.dto.category.NewCategoryDto;
 import ru.practicum.explorewithme.dto.compilation.Compilation;
@@ -18,15 +19,16 @@ import ru.practicum.explorewithme.dto.compilation.UpdateCompilationRequest;
 import ru.practicum.explorewithme.dto.event.*;
 import ru.practicum.explorewithme.dto.request.ParticipationRequest;
 import ru.practicum.explorewithme.dto.user.NewUserRequest;
+import ru.practicum.explorewithme.dto.user.User;
 import ru.practicum.explorewithme.dto.user.UserDto;
+import ru.practicum.explorewithme.exception.EntityNotFoundException;
+import ru.practicum.explorewithme.exception.ValidationException;
 import ru.practicum.explorewithme.mappers.CategoryMapper;
 import ru.practicum.explorewithme.mappers.CompilationMapper;
 import ru.practicum.explorewithme.mappers.EventMapper;
 import ru.practicum.explorewithme.mappers.UserMapper;
 import ru.practicum.explorewithme.repository.*;
 
-import javax.persistence.EntityNotFoundException;
-import javax.xml.bind.ValidationException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -49,16 +51,19 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public List<UserDto> findAllUsers(List<Long> ids, Integer from, Integer size) {
         if (!ids.isEmpty()) {
-            List<UserDto> userDtoList = userRepository.findAllById(ids);
-            log.info("Найдено {} пользователей в userDtoList.", userDtoList.size());
-            if (userDtoList.size() == 0) {
+            List<User> users = userRepository.findAllById(ids);
+            log.info("Найдено {} пользователей в userDtoList.", users.size());
+            if (users.size() == 0) {
                 return Collections.emptyList();
             }
-            return userDtoList;
+            return users
+                    .stream()
+                    .map(UserMapper::toUserDto)
+                    .collect(toList());
         }
 
         Pageable pageable = PageRequest.of(from, size);
-        List<UserDto> userPageable = userRepository.findAll(pageable)
+        List<User> userPageable = userRepository.findAll(pageable)
                 .stream()
                 .collect(Collectors.toList());
         log.info("Найдено {} пользователей в userPageable.", userPageable.size());
@@ -66,15 +71,18 @@ public class AdminServiceImpl implements AdminService {
         if (userPageable.size() == 0) {
             return Collections.emptyList();
         }
-        return userPageable;
+        return userPageable
+                .stream()
+                .map(UserMapper::toUserDto)
+                .collect(toList());
     }
 
     @Transactional
     @Override
     public UserDto addNewUser(NewUserRequest newUserRequest) {
-        UserDto userDto = userRepository.save(UserMapper.toUserDto(newUserRequest));
-        log.info("Создан пользователь {}", userDto);
-        return userDto;
+        User user = userRepository.save(UserMapper.toUser(newUserRequest));
+        log.info("Создан пользователь {}", user);
+        return UserMapper.toUserDto(user);
     }
 
     @Transactional
@@ -88,18 +96,18 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     @Override
     public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
-        CategoryDto category = categoryRepository.save(CategoryMapper.toCategoryDto(newCategoryDto));
+        Category category = categoryRepository.save(CategoryMapper.toCategory(newCategoryDto));
         log.info("Содана новая категория = {}", category);
-        return category;
+        return CategoryMapper.toCategoryDto(category);
     }
 
     @SneakyThrows
     @Transactional
     @Override
     public boolean deleteCategoryById(long catId) {
-        CategoryDto categoryDto = categoryRepository.findById(catId)
+        Category category = categoryRepository.findById(catId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Категории с id = %d нет в базе.", catId)));
-        List<Event> events = eventRepository.findAllByCategory(categoryDto);
+        List<Event> events = eventRepository.findAllByCategory(category);
         if (!events.isEmpty()) {
             throw new ValidationException(String.format("Категория не может быть удалена, т.к. с ней связаны события." +
                     " Количество событий = %d", events.size()));
@@ -112,31 +120,32 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     @Override
     public CategoryDto updateCategoryName(long id, CategoryDto categoryDto) {
-        CategoryDto category = categoryRepository.findById(id)
+        Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Категории с id = %d нет в базе.", id)));
         log.info("Найдена категория = {}", category);
 
         if (categoryDto.getName() != null && !categoryDto.getName().isBlank()) {
             String name = categoryDto.getName();
             if (categoryRepository.findByName(name).isPresent()) {
-                throw new RuntimeException(String.format("Категория с таким именем = %s уже существует в базе.", name));
+                throw new ValidationException(String.format("Категория с таким именем = %s уже существует в базе.", name));
             }
             category.setName(name);
             log.info("Имя категории изменено на {}, id = {}", category.getName(), category.getId());
-            return category;
         }
-        category.setName(category.getName());
-        return category;
+        return CategoryMapper.toCategoryDto(category);
     }
+    //category.setName(category.getName());
+    //return CategoryMapper.toCategoryDto(category);
+
 
     @Override
     public List<EventFullDto> findAllEvents(List<Long> users, List<String> states, List<Long> categories,
                                             LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
 
-        List<UserDto> userDtoList = null;
+        List<User> userList = null;
         if (users != null) {
-            userDtoList = userRepository.findAllById(users);
-            log.info("Найден пользователь = {}", userDtoList);
+            userList = userRepository.findAllById(users);
+            log.info("Найден пользователь = {}", userList);
         }
 
         List<EventState> listOfStates = null;
@@ -149,16 +158,16 @@ public class AdminServiceImpl implements AdminService {
             }
         }
 
-        List<CategoryDto> categoryDtoList = null;
+        List<Category> categoryList = null;
         if (categories != null) {
-            categoryDtoList = categoryRepository.findAllById(categories);
-            log.info("Найдена категория = {}", categoryDtoList);
+            categoryList = categoryRepository.findAllById(categories);
+            log.info("Найдена категория = {}", categoryList);
         }
 
         Pageable pageable = PageRequest.of(from, size);
 
         List<Event> eventsByQuery = eventRepository.findAllByQueryAdminParams(
-                        userDtoList, listOfStates, categoryDtoList, rangeStart, rangeEnd, pageable)
+                        userList, listOfStates, categoryList, rangeStart, rangeEnd, pageable)
                 .stream()
                 .collect(Collectors.toList());
 
@@ -241,6 +250,13 @@ public class AdminServiceImpl implements AdminService {
         if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
             throw new ValidationException("Обратите внимание: " +
                     "дата начала изменяемого события должна быть не ранее чем за час от даты публикации.");
+        }
+
+        if (updateEventAdminRequest.getEventDate() != null) {
+            if (updateEventAdminRequest.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
+                throw new ValidationException("Обратите внимание: " +
+                        "дата начала изменяемого события должна быть не ранее чем за час от даты публикации.");
+            }
         }
 
         if (updateEventAdminRequest.getStateAction().equals("REJECT_EVENT") &&

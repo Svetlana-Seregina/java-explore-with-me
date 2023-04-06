@@ -8,17 +8,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explorewithme.dto.Location;
-import ru.practicum.explorewithme.dto.category.CategoryDto;
+import ru.practicum.explorewithme.dto.category.Category;
 import ru.practicum.explorewithme.dto.event.*;
 import ru.practicum.explorewithme.dto.request.*;
+import ru.practicum.explorewithme.dto.user.User;
 import ru.practicum.explorewithme.dto.user.UserDto;
 import ru.practicum.explorewithme.exception.EntityNotFoundException;
+import ru.practicum.explorewithme.exception.ValidationException;
 import ru.practicum.explorewithme.mappers.EventMapper;
 import ru.practicum.explorewithme.mappers.LocationMapper;
 import ru.practicum.explorewithme.mappers.ParticipationRequestMapper;
 import ru.practicum.explorewithme.repository.*;
 
-import javax.xml.bind.ValidationException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -39,8 +40,8 @@ public class PrivateServiceImpl implements PrivateService {
     @Override
     public List<EventShortDto> findAllEventsByInitiator(long userId, Integer from, Integer size) {
         Pageable pageable = PageRequest.of(from, size);
-        UserDto userDto = findUserInRepository(userId);
-        List<Event> allEvents = eventRepository.findAllByInitiator(userDto, pageable)
+        User user = findUserInRepository(userId);
+        List<Event> allEvents = eventRepository.findAllByInitiator(user, pageable)
                 .stream().collect(Collectors.toList());
 
         if (allEvents.size() == 0) {
@@ -56,7 +57,7 @@ public class PrivateServiceImpl implements PrivateService {
     @Transactional
     @Override
     public EventFullDto createNewEvent(long userId, NewEventDto newEventDto) {
-        UserDto userDto = findUserInRepository(userId);
+        User user = findUserInRepository(userId);
         double lat = newEventDto.getLocation().getLat();
         double lon = newEventDto.getLocation().getLon();
         log.info("Местоположение: широта = {}, долгота = {}", lat, lon);
@@ -71,16 +72,16 @@ public class PrivateServiceImpl implements PrivateService {
         }
 
         Long catId = newEventDto.getCategory();
-        CategoryDto categoryDto = findCategoryInRepository(catId);
+        Category category = findCategoryInRepository(catId);
 
-        Event event = eventRepository.save(EventMapper.toEvent(categoryDto, userDto, location, newEventDto, EventState.PENDING));
+        Event event = eventRepository.save(EventMapper.toEvent(category, user, location, newEventDto, EventState.PENDING));
         log.info("Создано новое событие в базе: {}", event);
         return EventMapper.toEventFullDto(event);
     }
 
     @Override
     public EventFullDto findEventByInitiator(long userId, long eventId) {
-        UserDto user = findUserInRepository(userId);
+        User user = findUserInRepository(userId);
         Event event = eventRepository.findByIdAndInitiator(eventId, user);
         return EventMapper.toEventFullDto(event);
     }
@@ -89,42 +90,79 @@ public class PrivateServiceImpl implements PrivateService {
     @Transactional
     @Override
     public EventFullDto updateEventByInitiator(long userId, long eventId, UpdateEventUserRequest updateEventUserRequest) {
-        UserDto userDto = findUserInRepository(userId);
-
+        User user = findUserInRepository(userId);
         Event event = findEventInRepository(eventId);
 
-        if (updateEventUserRequest.getStateAction().equals("CANCEL_REVIEW")) {
-            if (!event.getInitiator().equals(userDto)) {
-                throw new ValidationException("Обратите внимание: событие может быть отменено только текущим пользователем.");
-            }
-            if (event.getState().equals(EventState.PUBLISHED)) {
-                throw new ValidationException("Обратите внимание: " +
-                        "отменить можно только отмененные события или события в состоянии ожидания модерации.");
-            }
-            if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-                throw new ValidationException("Обратите внимание: дата и время на которые намечено событие " +
+        if (event.getState().equals(EventState.PUBLISHED)) {
+            throw new ValidationException("Обратите внимание event: " +
+                    "изменить можно только отмененные события или события в состоянии ожидания модерации.");
+        }
+
+        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new ValidationException("Обратите внимание event: дата и время на которые намечено событие " +
+                    "не может быть раньше, чем через два часа от текущего момента.");
+        }
+
+        if (updateEventUserRequest.getEventDate() != null) {
+            if (updateEventUserRequest.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new ValidationException("Обратите внимание updateEventUserRequest: дата и время на которые намечено событие " +
                         "не может быть раньше, чем через два часа от текущего момента.");
             }
-
-            event.setState(EventState.CANCELED);
-            EventFullDto eventFullDto = EventMapper.toEventFullDto(event);
-            log.info("Событие обновлено {}", eventFullDto);
-            return eventFullDto;
-
         }
-        event.setState(EventState.PENDING);
-        EventFullDto eventFullDto = EventMapper.toEventFullDto(event);
-        log.info("Событие обновлено {}", eventFullDto);
-        return eventFullDto;
+
+        if (updateEventUserRequest.getStateAction() != null) {
+            if (updateEventUserRequest.getStateAction().equals("CANCEL_REVIEW")) {
+                if (!event.getInitiator().equals(user)) {
+                    throw new ValidationException("Обратите внимание: событие может быть отменено только текущим пользователем.");
+                }
+                if (event.getState().equals(EventState.PUBLISHED)) {
+                    throw new ValidationException("Обратите внимание: " +
+                            "отменить можно только отмененные события или события в состоянии ожидания модерации.");
+                }
+
+                event.setState(EventState.CANCELED);
+                EventFullDto eventFullDto = EventMapper.toEventFullDto(event);
+                log.info("Событие обновлено {}", eventFullDto);
+                return eventFullDto;
+
+            }
+            if (updateEventUserRequest.getStateAction().equals("SEND_TO_REVIEW")) {
+                event.setAnnotation(updateEventUserRequest.getAnnotation() != null && !updateEventUserRequest.getAnnotation().isBlank() ?
+                        updateEventUserRequest.getAnnotation() : event.getAnnotation());
+                if(updateEventUserRequest.getCategory() != null) {
+                    Category category = findCategoryInRepository(updateEventUserRequest.getCategory());
+                    event.setCategory(category);
+                }
+                event.setDescription(updateEventUserRequest.getDescription() != null && !updateEventUserRequest.getDescription().isBlank() ?
+                        updateEventUserRequest.getDescription() : event.getDescription());
+                event.setEventDate(updateEventUserRequest.getEventDate() != null ?
+                        updateEventUserRequest.getEventDate() : event.getEventDate());
+                event.setLocation(updateEventUserRequest.getLocation() != null ?
+                        updateEventUserRequest.getLocation() : event.getLocation());
+                event.setPaid(updateEventUserRequest.getPaid() != null ?
+                        updateEventUserRequest.getPaid() : event.getPaid());
+                event.setParticipantLimit(updateEventUserRequest.getParticipantLimit() != null ?
+                        updateEventUserRequest.getParticipantLimit() : event.getParticipantLimit());
+                event.setRequestModeration(updateEventUserRequest.getRequestModeration() != null ?
+                        updateEventUserRequest.getRequestModeration() : event.getRequestModeration());
+                event.setTitle(updateEventUserRequest.getTitle() != null && !updateEventUserRequest.getTitle().isBlank() ?
+                        updateEventUserRequest.getTitle() : event.getTitle());
+                event.setState(EventState.PENDING);
+                EventFullDto eventFullDto = EventMapper.toEventFullDto(event);
+                log.info("Событие обновлено {}", eventFullDto);
+                return eventFullDto;
+            }
+        }
+        return EventMapper.toEventFullDto(event);
     }
 
     @SneakyThrows
     @Override
     public List<ParticipationRequestDto> findAllEventRequestsByInitiator(long userId, long eventId) {
-        UserDto userDto = findUserInRepository(userId);
+        User user = findUserInRepository(userId);
         Event event = findEventInRepository(eventId);
 
-        if (!event.getInitiator().equals(userDto)) {
+        if (!event.getInitiator().equals(user)) {
             throw new ValidationException("Поиск запросов на участие может быть выполнен только организатором события.");
         }
 
@@ -144,19 +182,20 @@ public class PrivateServiceImpl implements PrivateService {
     public EventRequestStatusUpdateResult updateRequestStatusByInitiator(
             long userId, long eventId, EventRequestStatusUpdateRequest eventRequestStatusUpdateRequest) {
 
-        UserDto userDto = findUserInRepository(userId);
+        User user = findUserInRepository(userId);
         Event event = findEventInRepository(eventId);
 
-        if (!event.getInitiator().equals(userDto)) {
+        if (!event.getInitiator().equals(user)) {
             throw new ValidationException("Обновление запросов на участие может быть выполнено только организатором события.");
         }
 
-        List<ParticipationRequest> participationRequestList = participationRequestRepository.findAllByEventId(eventId);
+        List<ParticipationRequest> participationRequestList = participationRequestRepository.findAllByEventIdAndStatusIs(eventId, EventRequestStatus.CONFIRMED);
 
         log.info("Размер списка participationRequestList = {}", participationRequestList.size());
-
-        if (event.getParticipantLimit() <= event.getConfirmedRequests()) {
-            throw new ValidationException("Нельзя подтвердить заявку, уже достигнут лимит по заявкам на данное событие");
+        if(eventRequestStatusUpdateRequest.getStatus().equals("CONFIRMED")) {
+            if (event.getParticipantLimit() <= participationRequestList.size()) {
+                throw new ValidationException("Нельзя подтвердить заявку, уже достигнут лимит по заявкам на данное событие");
+            }
         }
 
         Long participantLimit = event.getParticipantLimit();
@@ -219,9 +258,9 @@ public class PrivateServiceImpl implements PrivateService {
 
     @Override
     public List<ParticipationRequestDto> getOwnRequestsByRequester(long userId) {
-        UserDto userDto = findUserInRepository(userId);
+        User user = findUserInRepository(userId);
 
-        List<ParticipationRequest> participationRequestList = participationRequestRepository.findAllByRequester(userDto);
+        List<ParticipationRequest> participationRequestList = participationRequestRepository.findAllByRequester(user);
         log.info("Найден participationRequestList = {}", participationRequestList);
 
         List<ParticipationRequestDto> allRequests = participationRequestList
@@ -236,14 +275,14 @@ public class PrivateServiceImpl implements PrivateService {
     @Transactional
     @Override
     public ParticipationRequestDto createRequestByRequester(long userId, long eventId) {
-        UserDto userDto = findUserInRepository(userId);
+        User user = findUserInRepository(userId);
         Event event = findEventInRepository(eventId);
 
-        if (participationRequestRepository.findByRequester(userDto).isPresent()) {
+        if (participationRequestRepository.findByRequesterAndEvent(user, event).isPresent()) {
             throw new ValidationException("Обратите внимание: нельзя добавить повторный запрос.");
         }
         log.info("ЭТО НЕ ПОВТОРНЫЙ ЗАПРОС");
-        if (event.getInitiator().equals(userDto)) {
+        if (event.getInitiator().equals(user)) {
             throw new ValidationException("Обратите внимание: инициатор события не может добавить запрос на участие в своём событии.");
         }
         log.info("ПОЛЬЗОВАТЕЛИ РАЗНЫЕ");
@@ -252,7 +291,7 @@ public class PrivateServiceImpl implements PrivateService {
         }
         log.info("СОБЫТИЕ ОПУБЛИКОВАНО");
 
-        int confirmedRequests = participationRequestRepository.findAllByEventId(eventId).size();
+        int confirmedRequests = participationRequestRepository.findAllByEventIdAndStatusIs(eventId, EventRequestStatus.CONFIRMED).size();
 
         log.info("event.getConfirmedRequests() = {}", confirmedRequests);
         log.info("event.getParticipantLimit() = {}", event.getParticipantLimit());
@@ -264,13 +303,13 @@ public class PrivateServiceImpl implements PrivateService {
         log.info("ЛИМИТ УЧАСТНИКОВ НЕ ПРЕВЫШАЕТ ПОДТВЕРЖДЕННЫЕ ЗАЯВКИ");
 
         if (event.getRequestModeration()) {
-            ParticipationRequest request = participationRequestRepository.save(ParticipationRequestMapper.toParticipationRequest(userDto, event, EventRequestStatus.PENDING));
+            ParticipationRequest request = participationRequestRepository.save(ParticipationRequestMapper.toParticipationRequest(user, event, EventRequestStatus.PENDING));
             log.info("Запрос на участие в событии со статусом PENDING сохранен в базе = {}", request);
 
             return ParticipationRequestMapper.toParticipationRequestDto(request);
         }
 
-        ParticipationRequest requestPublished = participationRequestRepository.save(ParticipationRequestMapper.toParticipationRequest(userDto, event, EventRequestStatus.CONFIRMED));
+        ParticipationRequest requestPublished = participationRequestRepository.save(ParticipationRequestMapper.toParticipationRequest(user, event, EventRequestStatus.CONFIRMED));
         log.info("Запрос на участие в событии со статусом CONFIRMED сохранен в базе = {}", requestPublished);
 
         return ParticipationRequestMapper.toParticipationRequestDto(requestPublished);
@@ -280,11 +319,11 @@ public class PrivateServiceImpl implements PrivateService {
     @Transactional
     @Override
     public ParticipationRequestDto cancelEventRequestByRequester(long userId, long requestId) {
-        UserDto userDto = findUserInRepository(userId);
+        User user = findUserInRepository(userId);
         ParticipationRequest participationRequest = participationRequestRepository.findById(requestId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Заявки на участие с таким id = %d нет в базе.", requestId)));
 
-        if (!participationRequest.getRequester().equals(userDto)) {
+        if (!participationRequest.getRequester().equals(user)) {
             throw new ValidationException("Удалить запрос может только владелец запроса на участие.");
         }
 
@@ -292,18 +331,18 @@ public class PrivateServiceImpl implements PrivateService {
         return ParticipationRequestMapper.toParticipationRequestDto(participationRequest);
     }
 
-    private UserDto findUserInRepository(long userId) {
-        UserDto userDto = userRepository.findById(userId)
+    private User findUserInRepository(long userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователя с id = %d нет в базе.", userId)));
-        log.info("Найден пользователь = {}", userDto);
-        return userDto;
+        log.info("Найден пользователь = {}", user);
+        return user;
     }
 
-    private CategoryDto findCategoryInRepository(long catId) {
-        CategoryDto categoryDto = categoryRepository.findById(catId)
+    private Category findCategoryInRepository(long catId) {
+        Category category = categoryRepository.findById(catId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Категории с id = %d нет в базе", catId)));
-        log.info("Найдена категория = {}", categoryDto);
-        return categoryDto;
+        log.info("Найдена категория = {}", category);
+        return category;
     }
 
     private Event findEventInRepository(long eventId) {

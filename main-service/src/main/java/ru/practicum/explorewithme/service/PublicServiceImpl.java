@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explorewithme.StatsClient;
 import ru.practicum.explorewithme.ViewStats;
+import ru.practicum.explorewithme.dto.category.Category;
 import ru.practicum.explorewithme.dto.category.CategoryDto;
 import ru.practicum.explorewithme.dto.compilation.Compilation;
 import ru.practicum.explorewithme.dto.compilation.CompilationDto;
@@ -18,6 +19,7 @@ import ru.practicum.explorewithme.dto.event.EventState;
 import ru.practicum.explorewithme.dto.request.EventRequestStatus;
 import ru.practicum.explorewithme.dto.request.ParticipationRequest;
 import ru.practicum.explorewithme.exception.EntityNotFoundException;
+import ru.practicum.explorewithme.mappers.CategoryMapper;
 import ru.practicum.explorewithme.mappers.CompilationMapper;
 import ru.practicum.explorewithme.mappers.EventMapper;
 import ru.practicum.explorewithme.repository.CategoryRepository;
@@ -46,21 +48,24 @@ public class PublicServiceImpl implements PublicService {
     @Override
     public List<CategoryDto> findAllCategories(Integer from, Integer size) {
         Pageable pageable = PageRequest.of(from, size);
-        List<CategoryDto> categoryDtoList = categoryRepository.findAll(pageable)
+        List<Category> categories = categoryRepository.findAll(pageable)
                 .stream().collect(Collectors.toList());
-        if (categoryDtoList.size() == 0) {
+        if (categories.size() == 0) {
             return Collections.emptyList();
         }
-        log.info("Найдено {} категорий", categoryDtoList.size());
-        return categoryDtoList;
+        log.info("Найдено {} категорий", categories.size());
+        return categories
+                .stream()
+                .map(CategoryMapper::toCategoryDto)
+                .collect(toList());
     }
 
     @Override
     public CategoryDto findCategoryById(long catId) {
-        CategoryDto category = categoryRepository.findById(catId)
+        Category category = categoryRepository.findById(catId)
                 .orElseThrow(() -> new EntityNotFoundException("Категория не найдена в базе"));
         log.info("Найдена категория = {}", category);
-        return category;
+        return CategoryMapper.toCategoryDto(category);
     }
 
     @Override
@@ -69,10 +74,10 @@ public class PublicServiceImpl implements PublicService {
                                              String sort, Integer from, Integer size,
                                              String path) {
 
-        List<CategoryDto> categoryDtoList = null;
+        List<Category> categoryList = null;
         if (categories != null) {
-            categoryDtoList = categoryRepository.findAllById(categories);
-            log.info("Найдена категория = {}", categoryDtoList);
+            categoryList = categoryRepository.findAllById(categories);
+            log.info("Найдена категория = {}", categoryList);
         }
 
         Pageable pageable = PageRequest.of(from, size);
@@ -80,14 +85,14 @@ public class PublicServiceImpl implements PublicService {
 
         if (rangeStart != null) {
             events = eventRepository.findAllByQueryPublicParams(
-                            text, categoryDtoList, paid, rangeStart, rangeEnd, EventState.PUBLISHED, pageable)
+                            text, categoryList, paid, rangeStart, rangeEnd, EventState.PUBLISHED, pageable)
                     .stream()
                     .collect(toList());
             log.info("Найдены allEventsByQuery where rangeStart != null: {}", events);
         }
         if (rangeStart == null) {
             events = eventRepository.findAllByQueryPublicParams(
-                            text, categoryDtoList, paid, LocalDateTime.now(), rangeEnd, EventState.PUBLISHED, pageable)
+                            text, categoryList, paid, LocalDateTime.now(), rangeEnd, EventState.PUBLISHED, pageable)
                     .stream()
                     .collect(toList());
             log.info("Найдены allEventsByQuery where rangeStart == null: {}", events);

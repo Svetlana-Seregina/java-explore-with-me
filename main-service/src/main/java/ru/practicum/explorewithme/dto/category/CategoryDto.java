@@ -1,26 +1,14 @@
 package ru.practicum.explorewithme.dto.category;
 
-import lombok.*;
+import lombok.Data;
 
-import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 
-@Entity
-@Table(name = "categories", schema = "public")
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
+@Data
 public class CategoryDto {
 
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-
+    private final Long id;
     @NotBlank
-    @Column(unique = true)
-    String name;
+    private final String name;
 
 }

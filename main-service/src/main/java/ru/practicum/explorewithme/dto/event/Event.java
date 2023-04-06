@@ -2,8 +2,8 @@ package ru.practicum.explorewithme.dto.event;
 
 import lombok.*;
 import ru.practicum.explorewithme.dto.Location;
-import ru.practicum.explorewithme.dto.category.CategoryDto;
-import ru.practicum.explorewithme.dto.user.UserDto;
+import ru.practicum.explorewithme.dto.category.Category;
+import ru.practicum.explorewithme.dto.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -26,7 +26,7 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")
-    private CategoryDto category;
+    private Category category;
 
     @Column(name = "confirmed_requests")
     private Long confirmedRequests; // Количество одобренных заявок на участие в данном событии
@@ -41,7 +41,7 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    private UserDto initiator;
+    private User initiator;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "location_id")

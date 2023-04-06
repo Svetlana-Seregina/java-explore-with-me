@@ -5,21 +5,22 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ru.practicum.explorewithme.dto.category.Category;
 import ru.practicum.explorewithme.dto.category.CategoryDto;
 import ru.practicum.explorewithme.dto.event.Event;
 import ru.practicum.explorewithme.dto.event.EventState;
-import ru.practicum.explorewithme.dto.user.UserDto;
+import ru.practicum.explorewithme.dto.user.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
 
-    Page<Event> findAllByInitiator(UserDto userDto, Pageable pageable);
+    Page<Event> findAllByInitiator(User user, Pageable pageable);
 
-    Event findByIdAndInitiator(long id, UserDto userDto);
+    Event findByIdAndInitiator(long id, User user);
 
-    List<Event> findAllByCategory(CategoryDto categoryDto);
+    List<Event> findAllByCategory(Category category);
 
     @Query(value = "SELECT e FROM Event AS e " +
             "WHERE (:users IS NULL OR e.initiator IN :users) " +
@@ -27,8 +28,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "AND (:categories IS NULL OR e.category IN :categories) " +
             "AND (DATE(:rangeStart) IS NULL OR e.eventDate > cast(:rangeStart as date)) " +
             "AND (DATE(:rangeEnd) IS NULL OR e.eventDate < cast(:rangeEnd as date))")
-    Page<Event> findAllByQueryAdminParams(@Param("users") List<UserDto> users, @Param("states") List<EventState> states,
-                                          @Param("categories") List<CategoryDto> categories,
+    Page<Event> findAllByQueryAdminParams(@Param("users") List<User> users, @Param("states") List<EventState> states,
+                                          @Param("categories") List<Category> categories,
                                           @Param("rangeStart") LocalDateTime rangeStart, @Param("rangeEnd") LocalDateTime rangeEnd,
                                           Pageable pageable);
 
@@ -40,7 +41,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "AND (DATE(:rangeStart) IS NULL OR e.eventDate > cast(:rangeStart as date)) " +
             "AND (DATE(:rangeEnd) IS NULL OR e.eventDate < cast(:rangeEnd as date)) " +
             "AND (e.state = :state)")
-    Page<Event> findAllByQueryPublicParams(@Param("text") String text, @Param("categories") List<CategoryDto> categories,
+    Page<Event> findAllByQueryPublicParams(@Param("text") String text, @Param("categories") List<Category> categories,
                                            @Param("paid") Boolean paid, @Param("rangeStart") LocalDateTime rangeStart,
                                            @Param("rangeEnd") LocalDateTime rangeEnd, @Param("state") EventState state,
                                            Pageable pageable);

@@ -1,23 +1,14 @@
 package ru.practicum.explorewithme.dto.user;
 
-import lombok.*;
+import lombok.Data;
+import lombok.ToString;
 
-import javax.persistence.*;
-
-@Entity
-@Table(name = "users", schema = "public")
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @ToString
 public class UserDto {
 
-    @Id
-    @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String name;
-    private String email;
+    private final Long id;
+    private final String name;
+    private final String email;
 
 }

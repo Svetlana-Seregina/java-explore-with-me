@@ -2,7 +2,7 @@ package ru.practicum.explorewithme.dto.request;
 
 import lombok.*;
 import ru.practicum.explorewithme.dto.event.Event;
-import ru.practicum.explorewithme.dto.user.UserDto;
+import ru.practicum.explorewithme.dto.user.User;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -29,7 +29,7 @@ public class ParticipationRequest {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
-    private UserDto requester; // Идентификатор пользователя, отправившего заявку
+    private User requester; // Идентификатор пользователя, отправившего заявку
 
     @Enumerated(EnumType.STRING)
     private EventRequestStatus status; // Статус заявки

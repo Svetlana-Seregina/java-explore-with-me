@@ -2,8 +2,10 @@ package ru.practicum.explorewithme.mappers;
 
 import lombok.experimental.UtilityClass;
 import ru.practicum.explorewithme.dto.Location;
+import ru.practicum.explorewithme.dto.category.Category;
 import ru.practicum.explorewithme.dto.category.CategoryDto;
 import ru.practicum.explorewithme.dto.event.*;
+import ru.practicum.explorewithme.dto.user.User;
 import ru.practicum.explorewithme.dto.user.UserDto;
 import ru.practicum.explorewithme.dto.user.UserShortDto;
 
@@ -12,15 +14,15 @@ import java.time.LocalDateTime;
 @UtilityClass
 public class EventMapper {
 
-    public static Event toEvent(CategoryDto categoryDto, UserDto userDto, Location location, NewEventDto newEventDto, EventState eventState) {
+    public static Event toEvent(Category category, User user, Location location, NewEventDto newEventDto, EventState eventState) {
         Event event = new Event();
         event.setAnnotation(newEventDto.getAnnotation());
-        event.setCategory(categoryDto);
+        event.setCategory(category);
         event.setConfirmedRequests(0L);
         event.setCreatedOn(LocalDateTime.now());
         event.setDescription(newEventDto.getDescription());
         event.setEventDate(newEventDto.getEventDate());
-        event.setInitiator(userDto);
+        event.setInitiator(user);
         event.setLocation(location);
         event.setPaid(newEventDto.getPaid());
         event.setParticipantLimit(newEventDto.getParticipantLimit());
@@ -33,7 +35,7 @@ public class EventMapper {
     public static EventFullDto toEventFullDto(Event event) {
         return new EventFullDto(
                 event.getAnnotation(),
-                event.getCategory(),
+                new CategoryDto(event.getCategory().getId(), event.getCategory().getName()),
                 event.getConfirmedRequests(),
                 event.getCreatedOn(),
                 event.getDescription(),
@@ -54,7 +56,7 @@ public class EventMapper {
     public static EventFullDto toEventFullDto(Event event, Long confirmedRequests, Long views) {
         return new EventFullDto(
                 event.getAnnotation(),
-                event.getCategory(),
+                new CategoryDto(event.getCategory().getId(), event.getCategory().getName()),
                 confirmedRequests,
                 event.getCreatedOn(),
                 event.getDescription(),
@@ -117,7 +119,7 @@ public class EventMapper {
     public static EventShortDto toEventShortDto(Event event) {
         return new EventShortDto(
                 event.getAnnotation(),
-                event.getCategory(),
+                new CategoryDto(event.getCategory().getId(), event.getCategory().getName()),
                 event.getConfirmedRequests(),
                 event.getEventDate(),
                 event.getId(),

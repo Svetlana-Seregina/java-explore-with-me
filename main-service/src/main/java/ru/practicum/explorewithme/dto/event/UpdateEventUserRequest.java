@@ -5,7 +5,7 @@ import lombok.ToString;
 
 @NoArgsConstructor
 @ToString
-public class UpdateEventUserRequest extends UpdateEventRequest{
+public class UpdateEventUserRequest extends UpdateEventRequest {
 
     private StateAction stateAction; // Изменение сотояния события: SEND_TO_REVIEW, CANCEL_REVIEW
 

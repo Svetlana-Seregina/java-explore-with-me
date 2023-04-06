@@ -5,7 +5,7 @@ import lombok.ToString;
 
 @NoArgsConstructor
 @ToString
-public class UpdateEventAdminRequest extends UpdateEventRequest{
+public class UpdateEventAdminRequest extends UpdateEventRequest {
 
     private StateAction stateAction;
 

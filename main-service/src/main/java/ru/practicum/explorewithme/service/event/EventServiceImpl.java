@@ -207,21 +207,19 @@ public class EventServiceImpl implements EventService {
         Map<Long, List<ParticipationRequest>> confirmedRequestsByEventId = findConfirmedRequests(events);
         Map<Long, List<ViewStats>> views = findViewStats(events);
         List<EventShortDto> eventShortDtoList = toEventShortDtoList(events, confirmedRequestsByEventId, views);
-
-        if (sort != null) {
-            if (sort.equals("EVENT_DATE")) {
-                return eventShortDtoList.stream()
-                        .sorted(Comparator.comparing(EventShortDto::getEventDate))
-                        .collect(toList());
-            }
-            if (sort.equals("VIEWS")) {
-                return eventShortDtoList.stream()
-                        .sorted(Comparator.comparing(EventShortDto::getViews))
-                        .collect(toList());
-            }
-        }
         log.info("eventShortDtoList = {}", eventShortDtoList);
-        return eventShortDtoList;
+
+        if (sort.equals("VIEWS")) {
+            return eventShortDtoList.stream()
+                    .sorted(Comparator.comparing(EventShortDto::getViews))
+                    .collect(toList());
+        }
+
+        List<EventShortDto> eventShortDtos = eventShortDtoList.stream()
+                .sorted(Comparator.comparing(EventShortDto::getEventDate))
+                .collect(toList());
+        log.info("eventShortDtos = {}", eventShortDtos);
+        return eventShortDtos;
     }
 
     @SneakyThrows
@@ -243,29 +241,29 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        if (UpdateEventAdminRequest.StateAction.valueOf(updateEventAdminRequest.getStateAction()) == REJECT_EVENT &&
+        if (updateEventAdminRequest.getStateAction() == REJECT_EVENT &&
                 event.getState().equals(EventState.PENDING)) {
             event.setState(EventState.CANCELED);
             log.info("Данные события обновлены: state = {}", event.getState());
             return EventMapper.toEventFullDto(event);
         }
 
-        if (UpdateEventAdminRequest.StateAction.valueOf(updateEventAdminRequest.getStateAction()) == REJECT_EVENT &&
+        if (updateEventAdminRequest.getStateAction() == REJECT_EVENT &&
                 event.getState().equals(EventState.PUBLISHED)) {
             throw new ValidationException("Обратите внимание: событие в статусе PUBLISHED отменить нельзя.");
         }
 
-        if (UpdateEventAdminRequest.StateAction.valueOf(updateEventAdminRequest.getStateAction()) == PUBLISH_EVENT &&
+        if (updateEventAdminRequest.getStateAction() == PUBLISH_EVENT &&
                 event.getState().equals(EventState.CANCELED)) {
             throw new ValidationException("Обратите внимание: событие в статусе CANCELED опубликовать нельзя.");
         }
 
-        if (UpdateEventAdminRequest.StateAction.valueOf(updateEventAdminRequest.getStateAction()) == PUBLISH_EVENT &&
+        if (updateEventAdminRequest.getStateAction() == PUBLISH_EVENT &&
                 event.getState().equals(EventState.PUBLISHED)) {
             throw new ValidationException("Обратите внимание: событие уже опубликовано.");
         }
 
-        if (UpdateEventAdminRequest.StateAction.valueOf(updateEventAdminRequest.getStateAction()) == PUBLISH_EVENT &&
+        if (updateEventAdminRequest.getStateAction() == PUBLISH_EVENT &&
                 event.getState().equals(EventState.PENDING)) {
             event.setState(EventState.PUBLISHED);
             event.setPublishedOn(LocalDateTime.now());
@@ -305,7 +303,7 @@ public class EventServiceImpl implements EventService {
         }
 
         if (updateEventUserRequest.getStateAction() != null) {
-            if (StateAction.valueOf(updateEventUserRequest.getStateAction()) ==
+            if (updateEventUserRequest.getStateAction() ==
                     StateAction.CANCEL_REVIEW) {
                 if (!event.getInitiator().equals(user)) {
                     throw new ValidationException("Обратите внимание: событие может быть отменено только текущим пользователем.");
@@ -321,7 +319,7 @@ public class EventServiceImpl implements EventService {
                 return eventFullDto;
 
             }
-            if (StateAction.valueOf(updateEventUserRequest.getStateAction()) ==
+            if (updateEventUserRequest.getStateAction() ==
                     SEND_TO_REVIEW) {
                 event.setAnnotation(updateEventUserRequest.getAnnotation() != null && !updateEventUserRequest.getAnnotation().isBlank() ?
                         updateEventUserRequest.getAnnotation() : event.getAnnotation());

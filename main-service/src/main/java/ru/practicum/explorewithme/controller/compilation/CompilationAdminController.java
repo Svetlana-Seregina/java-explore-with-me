@@ -31,11 +31,11 @@ public class CompilationAdminController {
     public ResponseEntity<Boolean> deleteCompilation(@PathVariable long compId) {
         log.info("Обрабатываем запрос на удаление подборки, id = {}", compId);
         boolean deleteCompilation = compilationService.deleteCompilation(compId);
-        return new ResponseEntity<>(deleteCompilation, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PatchMapping("/{compId}")
-    public CompilationDto updateCompilationById(@RequestBody UpdateCompilationRequest updateCompilationRequest,
+    public CompilationDto updateCompilationById(@RequestBody @Valid UpdateCompilationRequest updateCompilationRequest,
                                                 @PathVariable long compId) {
         log.info("Обрабатываем запрос на обновление подборки. Данные для обновления = {}", updateCompilationRequest);
         return compilationService.updateCompilationById(updateCompilationRequest, compId);

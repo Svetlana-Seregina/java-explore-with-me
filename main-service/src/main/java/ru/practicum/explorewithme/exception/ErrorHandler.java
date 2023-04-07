@@ -15,10 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @RestControllerAdvice
 @Slf4j
@@ -89,6 +86,24 @@ public class ErrorHandler {
                                                                HttpServletRequest request) {
         log.warn("Ошибка валидации запроса: {} \nПуть запроса: {}", e.getMessage(), request.getServletPath());
         return Map.of("error", e.getMessage());
+    }
+
+    @ExceptionHandler({EntityNotFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<ApiError> handleEntityNotFoundException(EntityNotFoundException e,
+                                                                  HttpServletRequest request) {
+        List<String> errors = new ArrayList<>();
+
+        log.warn("Ошибка: объект не найден в базе: {} \nПуть запроса: {}",
+                e.getMessage(), request.getServletPath());
+
+        String message = String.format("StackTrace: %s. Error: %s. Value: %s",
+                Arrays.toString(e.getStackTrace()), e.getMessage(), e.getCause());
+
+        ApiError apiError = new ApiError(errors, HttpStatus.NOT_FOUND, "Incorrectly made request.", message,
+                LocalDateTime.now());
+
+        return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
     }
 
 }

@@ -25,7 +25,7 @@ public class EventPublicController {
     private final StatsClient statsClient;
 
     @Value("${app}")
-    String app;
+    private String app;
 
     @GetMapping
     public List<EventShortDto> findAllEvents(@RequestParam(value = "text", required = false) String text,
@@ -33,8 +33,8 @@ public class EventPublicController {
                                              @RequestParam(value = "paid", required = false) Boolean paid,
                                              @RequestParam(value = "rangeStart", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
                                              @RequestParam(value = "rangeEnd", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
-                                             @RequestParam(value = "onlyAvailable", required = false) Boolean onlyAvailable,
-                                             @RequestParam(value = "sort", required = false) String sort, // EVENT_DATE, VIEWS
+                                             @RequestParam(value = "onlyAvailable", defaultValue = "false") Boolean onlyAvailable,
+                                             @RequestParam(value = "sort", defaultValue = "EVENT_DATE") String sort, // EVENT_DATE, VIEWS
                                              @RequestParam(value = "from", defaultValue = "0") Integer from,
                                              @RequestParam(value = "size", defaultValue = "10") Integer size,
                                              HttpServletRequest request) {

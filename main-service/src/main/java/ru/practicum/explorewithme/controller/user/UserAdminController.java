@@ -40,7 +40,7 @@ public class UserAdminController {
         log.info("Обрабатываем запрос на удаление пользователя с id = {}", userId);
         boolean deleteUser = userService.deleteUserById(userId);
         log.info("Пользователь удален ? = {}", deleteUser);
-        return new ResponseEntity<>(deleteUser, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

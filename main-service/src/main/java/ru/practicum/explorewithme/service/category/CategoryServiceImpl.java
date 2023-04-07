@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explorewithme.dto.category.Category;
 import ru.practicum.explorewithme.dto.category.CategoryDto;
 import ru.practicum.explorewithme.dto.category.NewCategoryDto;
-import ru.practicum.explorewithme.dto.event.Event;
 import ru.practicum.explorewithme.exception.EntityNotFoundException;
 import ru.practicum.explorewithme.exception.ValidationException;
 import ru.practicum.explorewithme.mappers.CategoryMapper;
@@ -44,12 +43,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     @Override
     public boolean deleteCategoryById(long catId) {
-        Category category = categoryRepository.findById(catId)
+        categoryRepository.findById(catId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Категории с id = %d нет в базе.", catId)));
-        List<Event> events = eventRepository.findAllByCategory(category);
-        if (!events.isEmpty()) {
-            throw new ValidationException(String.format("Категория не может быть удалена, т.к. с ней связаны события." +
-                    " Количество событий = %d", events.size()));
+        boolean existsEventsWithCategory = eventRepository.existsById(catId);
+        if (existsEventsWithCategory) {
+            throw new ValidationException("Категория не может быть удалена, т.к. с ней связаны события.");
         }
         categoryRepository.deleteById(catId);
         log.info("Категория с id = {} удалена.", catId);

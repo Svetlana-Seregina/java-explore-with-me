@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
@@ -28,7 +29,7 @@ public class NewEventDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
-    @NotNull
+    @Valid
     private Location location;
 
     private boolean paid; // default: false; Нужно ли оплачивать участие в событии
@@ -46,7 +47,9 @@ public class NewEventDto {
 
     @Data
     public static class Location {
+        @NotNull
         private final double lat;
+        @NotNull
         private final double lon;
     }
 

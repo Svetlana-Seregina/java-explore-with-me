@@ -37,7 +37,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationDto createNewCompilation(NewCompilationDto newCompilationDto) {
         List<Long> eventIds = newCompilationDto.getEvents();
-        if (eventIds.isEmpty()) {
+        if (eventIds == null || eventIds.isEmpty()) {
             Compilation compilation = compilationRepository.save(CompilationMapper.toCompilation(newCompilationDto, Collections.emptyList()));
             log.info("Создана подборка {}", compilation);
             CompilationDto compilationDto = CompilationMapper.toCompilationDto(compilation, Collections.emptyList());
@@ -80,11 +80,13 @@ public class CompilationServiceImpl implements CompilationService {
         List<Long> eventIds = updateCompilationRequest.getEvents();
         log.info("Количество eventIds: {}", eventIds);
 
-        if (eventIds.isEmpty()) {
+        if (eventIds == null || eventIds.isEmpty()) {
             Set<Event> eventSet = new HashSet<>();
             compilation.setEvents(eventSet);
-            compilation.setPinned(updateCompilationRequest.getPinned());
-            compilation.setTitle(updateCompilationRequest.getTitle());
+            compilation.setPinned(updateCompilationRequest.getPinned() != null ?
+                    updateCompilationRequest.getPinned() : compilation.getPinned());
+            compilation.setTitle(updateCompilationRequest.getTitle() != null ?
+                    updateCompilationRequest.getTitle() : compilation.getTitle());
             log.info("Создана подборка {}", compilation);
             CompilationDto compilationDto = CompilationMapper.toCompilationDto(compilation, Collections.emptyList());
             log.info("Количество событий в compilationDto: {}", compilationDto.getEvents().size());
@@ -97,8 +99,10 @@ public class CompilationServiceImpl implements CompilationService {
         Set<Event> eventSet = new HashSet<>(events);
 
         compilation.setEvents(eventSet);
-        compilation.setPinned(updateCompilationRequest.getPinned());
-        compilation.setTitle(updateCompilationRequest.getTitle());
+        compilation.setPinned(updateCompilationRequest.getPinned() != null ?
+                updateCompilationRequest.getPinned() : compilation.getPinned());
+        compilation.setTitle(updateCompilationRequest.getTitle() != null ?
+                updateCompilationRequest.getTitle() : compilation.getTitle());
 
         List<EventShortDto> eventShortDtoList = events.stream()
                 .map(EventMapper::toEventShortDto)

@@ -167,11 +167,13 @@ public class RequestServiceImpl implements RequestService {
 
         int confirmedRequests = participationRequestRepository.findAllByEventIdAndStatusIs(eventId, EventRequestStatus.CONFIRMED).size();
 
-        log.info("event.getConfirmedRequests() = {}", confirmedRequests);
+        log.info("confirmedRequests = {}", confirmedRequests);
         log.info("event.getParticipantLimit() = {}", event.getParticipantLimit());
 
-        if (confirmedRequests >= event.getParticipantLimit()) {
-            throw new ValidationException("Обратите внимание: у события достигнут лимит запросов на участие.");
+        if (event.getParticipantLimit() != 0) {
+            if (confirmedRequests == event.getParticipantLimit()) {
+                throw new ValidationException("Обратите внимание: у события достигнут лимит запросов на участие.");
+            }
         }
 
         log.info("ЛИМИТ УЧАСТНИКОВ НЕ ПРЕВЫШАЕТ ПОДТВЕРЖДЕННЫЕ ЗАЯВКИ");
@@ -202,6 +204,7 @@ public class RequestServiceImpl implements RequestService {
         }
 
         participationRequest.setStatus(EventRequestStatus.CANCELED);
+        log.info("Заявка на участие отменена.");
         return ParticipationRequestMapper.toParticipationRequestDto(participationRequest);
     }
 

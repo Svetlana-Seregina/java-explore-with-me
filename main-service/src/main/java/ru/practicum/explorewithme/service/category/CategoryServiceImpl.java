@@ -61,15 +61,12 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Категории с id = %d нет в базе.", id)));
         log.info("Найдена категория = {}", category);
 
-        if (categoryDto.getName() != null && !categoryDto.getName().isBlank()) {
-            String name = categoryDto.getName();
-            if (categoryRepository.findByName(name).isPresent()) {
-                throw new ValidationException(String.format("Категория с таким именем = %s уже существует в базе.", name));
-            }
-            category.setName(name);
-            log.info("Имя категории изменено на {}, id = {}", category.getName(), category.getId());
-        }
+        String name = categoryDto.getName();
+        category.setName(name);
+        log.info("Имя категории изменено на {}, id = {}", category.getName(), category.getId());
+
         return CategoryMapper.toCategoryDto(category);
+
     }
 
     @Override

@@ -59,6 +59,20 @@ public class CommentServiceImpl implements CommentService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<CommentDto> findAllEventComments(long eventId) {
+        Event event = findEventInRepository(eventId);
+
+        List<Comment> allComments = commentRepository.findAllByEvent(event);
+        List<CommentDto> allDtoComments = allComments.stream()
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList());
+
+        log.info("Найдыны все комментарии к событию {}", allDtoComments);
+
+        return allDtoComments;
+    }
+
 
     private User findUserInRepository(long userId) {
         User user = userRepository.findById(userId)

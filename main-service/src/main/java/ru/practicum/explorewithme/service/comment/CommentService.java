@@ -9,6 +9,8 @@ public interface CommentService {
 
     CommentDto addNewComment(long userId, long eventId, NewComment newComment);
 
-
     List<CommentDto> findAllCommentsByAuthor(long userId);
+
+    List<CommentDto> findAllEventComments(long eventId);
+
 }

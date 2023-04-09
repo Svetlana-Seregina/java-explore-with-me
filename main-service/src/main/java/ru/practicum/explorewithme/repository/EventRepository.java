@@ -19,8 +19,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     Event findByIdAndInitiator(long id, User user);
 
-    List<Event> findAllByCategory(Category category);
-
     @Query(value = "SELECT e FROM Event AS e " +
             "WHERE (:users IS NULL OR e.initiator IN :users) " +
             "AND (:states IS NULL OR e.state IN :states) " +

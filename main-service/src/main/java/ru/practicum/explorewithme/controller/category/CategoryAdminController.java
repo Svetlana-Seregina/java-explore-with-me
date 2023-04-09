@@ -30,7 +30,7 @@ public class CategoryAdminController {
     public ResponseEntity<Boolean> deleteCategoryById(@PathVariable long catId) {
         log.info("Обрабатываем запрос на удаление категории. Создан запрос на удаление категории по id = {}", catId);
         boolean categoryDelete = categoryService.deleteCategoryById(catId);
-        return new ResponseEntity<>(categoryDelete, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PatchMapping("/{catId}")

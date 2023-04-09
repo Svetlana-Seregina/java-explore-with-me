@@ -96,14 +96,12 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto findEventById(long id, String path) {
         Event event = findEventInRepository(id);
-
-        List<ParticipationRequest> participationRequests = participationRequestRepository.findAllByEventIdAndStatusIs(
+        Long confirmedRequests = participationRequestRepository.countAllByEventIdAndStatusIs(
                 id, EventRequestStatus.CONFIRMED);
-        int confirmedRequests = participationRequests.size();
-
+        log.info("confirmedRequests = {}", confirmedRequests);
         Long views = findViews(event, path);
 
-        EventFullDto eventFullDto = EventMapper.toEventFullDto(event, (long) confirmedRequests, views);
+        EventFullDto eventFullDto = EventMapper.toEventFullDto(event, confirmedRequests, views);
         log.info("Найдено событие по id = {}; EVENT = {}", id, eventFullDto);
 
         return eventFullDto;
@@ -144,8 +142,8 @@ public class EventServiceImpl implements EventService {
             log.info("По заданным параметрам в базе ничего не найдено. Возвращаем пустой список.");
             return Collections.emptyList();
         }
-        Map<Long, List<ParticipationRequest>> confirmedRequestsByEventId = findConfirmedRequests(eventsByQuery);
-        Map<Long, List<ViewStats>> views = findViewStats(eventsByQuery);
+        Map<Long, Long> confirmedRequestsByEventId = findConfirmedRequests(eventsByQuery);
+        Map<Long, Long> views = findViewStats(eventsByQuery);
 
         List<EventFullDto> eventFullDtos = eventsByQuery.stream()
                 .map(EventMapper::toEventFullDto)
@@ -153,20 +151,13 @@ public class EventServiceImpl implements EventService {
                     if (confirmedRequestsByEventId.isEmpty()) {
                         return eventFullDto;
                     }
-                    List<ParticipationRequest> participationRequests = confirmedRequestsByEventId.get(eventFullDto.getId());
-                    int confirmedRequests = participationRequests.size();
-                    return EventMapper.toEventFullDto(eventFullDto, (long) confirmedRequests, 0L);
+                    Long confirmedRequests = confirmedRequestsByEventId.get(eventFullDto.getId());
+                    return EventMapper.toEventFullDto(eventFullDto, confirmedRequests, 0L);
                 }).map(eventFullDto -> {
-                    List<ViewStats> viewStats = views.get(eventFullDto.getId());
-                    Long allViews = 0L;
-                    if (viewStats != null) {
-                        allViews = views.get(eventFullDto.getId())
-                                .stream()
-                                .map(ViewStats::getHits)
-                                .findFirst()
-                                .get();
-                        return EventMapper.toEventFullDtoWithViews(eventFullDto, allViews);
+                    if (views.isEmpty()) {
+                        return eventFullDto;
                     }
+                    Long allViews = views.get(eventFullDto.getId());
                     return EventMapper.toEventFullDtoWithViews(eventFullDto, allViews);
                 })
                 .collect(toList());
@@ -204,24 +195,23 @@ public class EventServiceImpl implements EventService {
             return Collections.emptyList();
         }
 
-        Map<Long, List<ParticipationRequest>> confirmedRequestsByEventId = findConfirmedRequests(events);
-        Map<Long, List<ViewStats>> views = findViewStats(events);
-        List<EventShortDto> eventShortDtoList = toEventShortDtoList(events, confirmedRequestsByEventId, views);
+        Map<Long, Long> confirmedRequestsByEventId = findConfirmedRequests(events);
+        Map<Long, Long> views = findViewStats(events);
 
-        if (sort != null) {
-            if (sort.equals("EVENT_DATE")) {
-                return eventShortDtoList.stream()
-                        .sorted(Comparator.comparing(EventShortDto::getEventDate))
-                        .collect(toList());
-            }
-            if (sort.equals("VIEWS")) {
-                return eventShortDtoList.stream()
-                        .sorted(Comparator.comparing(EventShortDto::getViews))
-                        .collect(toList());
-            }
-        }
+        List<EventShortDto> eventShortDtoList = toEventShortDtoList(events, confirmedRequestsByEventId, views);
         log.info("eventShortDtoList = {}", eventShortDtoList);
-        return eventShortDtoList;
+
+        if (sort.equals("VIEWS")) {
+            return eventShortDtoList.stream()
+                    .sorted(Comparator.comparing(EventShortDto::getViews))
+                    .collect(toList());
+        }
+
+        List<EventShortDto> eventShortDtos = eventShortDtoList.stream()
+                .sorted(Comparator.comparing(EventShortDto::getEventDate))
+                .collect(toList());
+        log.info("eventShortDtos = {}", eventShortDtos);
+        return eventShortDtos;
     }
 
     @SneakyThrows
@@ -243,29 +233,29 @@ public class EventServiceImpl implements EventService {
             }
         }
 
-        if (UpdateEventAdminRequest.StateAction.valueOf(updateEventAdminRequest.getStateAction()) == REJECT_EVENT &&
+        if (updateEventAdminRequest.getStateAction() == REJECT_EVENT &&
                 event.getState().equals(EventState.PENDING)) {
             event.setState(EventState.CANCELED);
             log.info("Данные события обновлены: state = {}", event.getState());
             return EventMapper.toEventFullDto(event);
         }
 
-        if (UpdateEventAdminRequest.StateAction.valueOf(updateEventAdminRequest.getStateAction()) == REJECT_EVENT &&
+        if (updateEventAdminRequest.getStateAction() == REJECT_EVENT &&
                 event.getState().equals(EventState.PUBLISHED)) {
             throw new ValidationException("Обратите внимание: событие в статусе PUBLISHED отменить нельзя.");
         }
 
-        if (UpdateEventAdminRequest.StateAction.valueOf(updateEventAdminRequest.getStateAction()) == PUBLISH_EVENT &&
+        if (updateEventAdminRequest.getStateAction() == PUBLISH_EVENT &&
                 event.getState().equals(EventState.CANCELED)) {
             throw new ValidationException("Обратите внимание: событие в статусе CANCELED опубликовать нельзя.");
         }
 
-        if (UpdateEventAdminRequest.StateAction.valueOf(updateEventAdminRequest.getStateAction()) == PUBLISH_EVENT &&
+        if (updateEventAdminRequest.getStateAction() == PUBLISH_EVENT &&
                 event.getState().equals(EventState.PUBLISHED)) {
             throw new ValidationException("Обратите внимание: событие уже опубликовано.");
         }
 
-        if (UpdateEventAdminRequest.StateAction.valueOf(updateEventAdminRequest.getStateAction()) == PUBLISH_EVENT &&
+        if (updateEventAdminRequest.getStateAction() == PUBLISH_EVENT &&
                 event.getState().equals(EventState.PENDING)) {
             event.setState(EventState.PUBLISHED);
             event.setPublishedOn(LocalDateTime.now());
@@ -305,7 +295,7 @@ public class EventServiceImpl implements EventService {
         }
 
         if (updateEventUserRequest.getStateAction() != null) {
-            if (StateAction.valueOf(updateEventUserRequest.getStateAction()) ==
+            if (updateEventUserRequest.getStateAction() ==
                     StateAction.CANCEL_REVIEW) {
                 if (!event.getInitiator().equals(user)) {
                     throw new ValidationException("Обратите внимание: событие может быть отменено только текущим пользователем.");
@@ -321,7 +311,7 @@ public class EventServiceImpl implements EventService {
                 return eventFullDto;
 
             }
-            if (StateAction.valueOf(updateEventUserRequest.getStateAction()) ==
+            if (updateEventUserRequest.getStateAction() ==
                     SEND_TO_REVIEW) {
                 event.setAnnotation(updateEventUserRequest.getAnnotation() != null && !updateEventUserRequest.getAnnotation().isBlank() ?
                         updateEventUserRequest.getAnnotation() : event.getAnnotation());
@@ -370,29 +360,36 @@ public class EventServiceImpl implements EventService {
         return categoryList;
     }
 
-    private Map<Long, List<ParticipationRequest>> findConfirmedRequests(List<Event> events) {
+    private Map<Long, Long> findConfirmedRequests(List<Event> events) {
+
+        log.info("Поиск подтвержденных заявок на учатстие.");
+
         List<Long> eventIds = new ArrayList<>();
         for (Event event : events) {
             Long evId = event.getId();
             eventIds.add(evId);
         }
+        log.info("Список eventIds для поиска = {}", eventIds.size());
 
         List<ParticipationRequest> confirmedRequests =
                 participationRequestRepository.findAllByEventIdInAndStatusIs(eventIds, EventRequestStatus.CONFIRMED);
 
+        log.info("Размер списка confirmedRequests = {}", confirmedRequests.size());
+
         if (confirmedRequests.isEmpty()) {
             return new HashMap<>();
         }
-        Map<Long, List<ParticipationRequest>> confirmedRequestsByEventId =
+        Map<Long, Long> confirmedRequestsByEventId =
                 confirmedRequests
                         .stream()
-                        .collect(Collectors.groupingBy(b -> b.getEvent().getId(), toList()));
-        log.info("confirmedRequestsByEventId.size = {}", confirmedRequestsByEventId.size());
+                        .collect(Collectors.groupingBy(b -> b.getEvent().getId(), Collectors.counting()));
+        log.info("Найдены confirmedRequestsByEventId = {}", confirmedRequestsByEventId.entrySet());
 
         return confirmedRequestsByEventId;
     }
 
-    private Map<Long, List<ViewStats>> findViewStats(List<Event> events) {
+    private Map<Long, Long> findViewStats(List<Event> events) {
+        log.info("Поиск статистики просмотров.");
 
         LocalDateTime publishedDate = events
                 .stream()
@@ -412,9 +409,9 @@ public class EventServiceImpl implements EventService {
         }
         log.info("СПИСОК URIS = {}", uris);
 
-        Map<Long, List<ViewStats>> views = statsClient.getStats(publishedDate, actualDate, uris, false)
+        Map<Long, Long> views = statsClient.getStats(publishedDate, actualDate, uris, true)
                 .stream()
-                .collect(Collectors.groupingBy(b -> (long) Integer.parseInt(b.getUri().substring(8)), toList()));
+                .collect(Collectors.groupingBy(b -> (long) Integer.parseInt(b.getUri().substring(8)), Collectors.counting()));
 
         log.info("Получена статистика views = {}", views.entrySet());
 
@@ -439,14 +436,14 @@ public class EventServiceImpl implements EventService {
     }
 
     private Long findViews(Event event, String path) {
-
+        log.info("Поиск статистики просмотров события.");
         LocalDateTime publishedDate = event.getPublishedOn();
         LocalDateTime actualDate = LocalDateTime.now();
         log.info("Даты для поиска статистики о событии от publishedDate = {} до actualDate = {}", publishedDate, actualDate);
 
         List<String> uris = new ArrayList<>();
         uris.add(path);
-        List<ViewStats> viewStats = statsClient.getStats(publishedDate, actualDate, uris, false);
+        List<ViewStats> viewStats = statsClient.getStats(publishedDate, actualDate, uris, true);
         log.info("Найдены просмотры события views = {}", viewStats.size());
         Long views = null;
         if (viewStats.size() > 0) {
@@ -455,13 +452,12 @@ public class EventServiceImpl implements EventService {
         if (viewStats.size() == 0) {
             views = 0L;
         }
-
         return views;
     }
 
     private List<EventShortDto> toEventShortDtoList(List<Event> events,
-                                                    Map<Long, List<ParticipationRequest>> confirmedRequestsByEventId,
-                                                    Map<Long, List<ViewStats>> views) {
+                                                    Map<Long, Long> confirmedRequestsByEventId,
+                                                    Map<Long, Long> views) {
 
         return events.stream()
                 .map(EventMapper::toEventShortDto)
@@ -469,24 +465,17 @@ public class EventServiceImpl implements EventService {
                     if (confirmedRequestsByEventId.isEmpty()) {
                         return eventShortDto;
                     }
-                    List<ParticipationRequest> participationRequests = confirmedRequestsByEventId.get(eventShortDto.getId());
-                    int confirmedRequests = participationRequests.size();
-
-                    return EventMapper.toEventShortDtoWithConfirmedRequests(eventShortDto, (long) confirmedRequests);
+                    Long confirmedRequests = confirmedRequestsByEventId.get(eventShortDto.getId());
+                    return EventMapper.toEventShortDtoWithConfirmedRequests(eventShortDto, confirmedRequests);
                 })
                 .map(eventShortDto -> {
-                    List<ViewStats> viewStats = views.get(eventShortDto.getId());
-                    log.info("viewStats = {}", viewStats);
-                    Long hits = 0L;
-                    if (viewStats != null) {
-                        hits = viewStats.get(0).getHits();
-                        log.info("hits = {}", hits);
-                        return EventMapper.toEventShortDtoWithViews(eventShortDto, hits);
+                    if (views.isEmpty()) {
+                        return eventShortDto;
                     }
-                    return EventMapper.toEventShortDtoWithViews(eventShortDto, hits);
+                    Long allViews = views.get(eventShortDto.getId());
+                    return EventMapper.toEventShortDtoWithViews(eventShortDto, allViews);
                 })
                 .collect(toList());
-
     }
 
 }

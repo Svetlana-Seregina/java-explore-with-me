@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS compilation
 
 CREATE TABLE IF NOT EXISTS list_of_entities
 (
+    id              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     compilation_id  BIGINT,
     events_id       BIGINT,
     CONSTRAINT fk_event_id FOREIGN KEY (events_id) REFERENCES events (id),

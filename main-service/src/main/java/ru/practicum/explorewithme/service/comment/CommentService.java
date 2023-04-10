@@ -2,6 +2,7 @@ package ru.practicum.explorewithme.service.comment;
 
 import ru.practicum.explorewithme.dto.comment.CommentDto;
 import ru.practicum.explorewithme.dto.comment.NewComment;
+import ru.practicum.explorewithme.dto.comment.UpdateCommentRequest;
 
 import java.util.List;
 
@@ -14,4 +15,7 @@ public interface CommentService {
     List<CommentDto> findAllEventComments(long eventId);
 
     boolean deleteCommentById(long commentId);
+
+    CommentDto updateCommentByAuthor(long userId, long commentId, UpdateCommentRequest updateCommentRequest);
+
 }

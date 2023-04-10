@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explorewithme.dto.comment.CommentDto;
 import ru.practicum.explorewithme.dto.comment.NewComment;
+import ru.practicum.explorewithme.dto.comment.UpdateCommentRequest;
 import ru.practicum.explorewithme.service.comment.CommentService;
 
 import javax.validation.Valid;
@@ -42,6 +43,16 @@ public class CommentPrivateController {
         boolean deleteComment = commentService.deleteCommentById(commentId);
         log.info("Пользователь удален ? = {}", deleteComment);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping("/{userId}/comments/{commentId}")
+    public CommentDto updateCommentByAuthor(@PathVariable long userId,
+                                            @PathVariable long commentId,
+                                            @RequestBody @Valid UpdateCommentRequest updateCommentRequest) {
+        log.info("Обрабатываем запрос на обновление комментария. Данные для обновления text = {}, ",
+                updateCommentRequest.getText());
+
+        return commentService.updateCommentByAuthor(userId, commentId, updateCommentRequest);
     }
 
 }

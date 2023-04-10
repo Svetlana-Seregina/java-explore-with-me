@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.explorewithme.dto.comment.Comment;
 import ru.practicum.explorewithme.dto.comment.CommentDto;
 import ru.practicum.explorewithme.dto.comment.NewComment;
+import ru.practicum.explorewithme.dto.comment.UpdateCommentRequest;
 import ru.practicum.explorewithme.dto.event.Event;
 import ru.practicum.explorewithme.dto.user.User;
 import ru.practicum.explorewithme.exception.EntityNotFoundException;
@@ -40,6 +41,10 @@ public class CommentServiceImpl implements CommentService {
         User user = findUserInRepository(userId);
         Event event = findEventInRepository(eventId);
 
+        if (event.getInitiator().equals(user)) {
+            throw new ValidationException("Организатор события не может оставлять комментарий.");
+        }
+
         Comment comment = commentRepository.save(CommentMapper.toComment(user, event, newComment));
         log.info("Создан новый комментарий: {}", comment);
         return CommentMapper.toCommentDto(comment);
@@ -52,7 +57,7 @@ public class CommentServiceImpl implements CommentService {
         List<Comment> userComments = commentRepository.findAllByAuthor(user, sort);
         log.info("Найдено {} комментариев пользователя.", userComments.size());
 
-        if(userComments.isEmpty()) {
+        if (userComments.isEmpty()) {
             return Collections.emptyList();
         }
 
@@ -78,10 +83,9 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public boolean deleteCommentById(long commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("События с id = %d в базе нет.", commentId)));
+        Comment comment = findCommentInRepository(commentId);
 
-        if(comment.getCreatedDate().isAfter(LocalDateTime.now().plusMinutes(1))) {
+        if (comment.getCreatedDate().isAfter(LocalDateTime.now().plusMinutes(1))) {
             throw new ValidationException("Невозможно удалить комментарий оставленный более минуты назад.");
         }
 
@@ -89,6 +93,26 @@ public class CommentServiceImpl implements CommentService {
         log.info("Комментарий с id = {} удален.", commentId);
 
         return commentRepository.existsById(commentId);
+    }
+
+    @Transactional
+    @Override
+    public CommentDto updateCommentByAuthor(long userId, long commentId, UpdateCommentRequest updateCommentRequest) {
+        Comment comment = findCommentInRepository(commentId);
+        User user = findUserInRepository(userId);
+
+        if (!comment.getAuthor().equals(user)) {
+            throw new ValidationException("Редактировать комментарий может только автор комментария.");
+        }
+
+        if (comment.getCreatedDate().isAfter(LocalDateTime.now().plusMinutes(1))) {
+            throw new ValidationException("Невозможно редактировать комментарий оставленный более минуты назад.");
+        }
+
+        comment.setText(updateCommentRequest.getText());
+        log.info("Комментарий с id = {} изменен.", commentId);
+
+        return CommentMapper.toCommentDto(comment);
     }
 
     private User findUserInRepository(long userId) {
@@ -103,6 +127,13 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new EntityNotFoundException(String.format("События с id = %d в базе нет.", eventId)));
         log.info("Найдено событие, event = {}", event);
         return event;
+    }
+
+    private Comment findCommentInRepository(long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("События с id = %d в базе нет.", commentId)));
+        log.info("Найден комментарий, comment = {}", comment);
+        return comment;
     }
 
 }

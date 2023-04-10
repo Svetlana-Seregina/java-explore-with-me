@@ -9,22 +9,22 @@ import java.util.List;
 public interface EndpointHitRepository extends JpaRepository<EndpointHit, Long> {
 
     @Query(value = "SELECT " +
-            "distinct new ru.practicum.explorewithme.ViewStats(a.name, ep.uri, COUNT(ep.uri)) " +
+            "new ru.practicum.explorewithme.ViewStats(a.name, ep.uri, COUNT(distinct ep.ip)) " +
             "FROM EndpointHit AS ep " +
             "INNER JOIN Application AS a on ep.app.id = a.id " +
             "WHERE ep.timestamp BETWEEN ?1 AND ?2 " +
             "GROUP BY a.name, ep.uri " +
-            "ORDER BY COUNT(ep.uri) desc ")
+            "ORDER BY COUNT(ep.ip) desc ")
     List<ViewStats> findViewStatsWhenUrisIsEmptyAndIpIsUnique(LocalDateTime start, LocalDateTime end);
 
     @Query(value = "SELECT " +
-            "distinct new ru.practicum.explorewithme.ViewStats(a.name, ep.uri, COUNT(ep.uri)) " +
+            "new ru.practicum.explorewithme.ViewStats(a.name, ep.uri, COUNT(distinct ep.ip)) " +
             "FROM EndpointHit AS ep " +
             "INNER JOIN Application AS a on ep.app.id = a.id " +
             "WHERE ep.timestamp BETWEEN ?1 AND ?2 " +
             "AND ep.uri IN ?3 " +
             "GROUP BY a.name, ep.uri " +
-            "ORDER BY count(ep.uri) desc ")
+            "ORDER BY count(distinct ep.ip) desc ")
     List<ViewStats> findViewStatsWhenUrisIsNotEmptyAndIpIsUnique(LocalDateTime start, LocalDateTime end, List<String> uris);
 
     @Query(value = "SELECT " +

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -33,17 +33,22 @@ public class StatsServiceImpl implements StatsService {
     public List<ViewStats> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
         if (unique) {
             if (uris.isEmpty()) {
-                return endpointHitRepository.findViewStatsWhenUrisIsEmptyAndIpIsUnique(start, end);
-            } else {
-                return endpointHitRepository.findViewStatsWhenUrisIsNotEmptyAndIpIsUnique(start, end, uris);
+                List<ViewStats> viewStats1 = endpointHitRepository.findViewStatsWhenUrisIsEmptyAndIpIsUnique(start, end);
+                log.info("Найдены просмотры в БД, viewStats1 = {}", viewStats1);
+                return viewStats1;
             }
+            List<ViewStats> viewStats3 = endpointHitRepository.findViewStatsWhenUrisIsNotEmptyAndIpIsUnique(start, end, uris);
+            log.info("Найдены просмотры в БД, viewStats3 = {}", viewStats3);
+            return viewStats3;
         } else {
             if (uris.isEmpty()) {
-                return endpointHitRepository.findViewStatsWhenUrisIsEmptyAndIpIsNotUnique(start, end);
-            } else {
-                return endpointHitRepository.findViewStatsWhenUrisIsNotEmptyAndIpIsNotUnique(start, end, uris);
+                List<ViewStats> viewStats4 = endpointHitRepository.findViewStatsWhenUrisIsEmptyAndIpIsNotUnique(start, end);
+                log.info("Найдены просмотры в БД, viewStats4 = {}", viewStats4);
+                return viewStats4;
             }
+            List<ViewStats> viewStats6 = endpointHitRepository.findViewStatsWhenUrisIsNotEmptyAndIpIsNotUnique(start, end, uris);
+            log.info("Найдены просмотры в БД, viewStats4 = {}", viewStats6);
+            return viewStats6;
         }
     }
-
 }

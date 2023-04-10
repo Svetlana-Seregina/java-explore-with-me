@@ -2,21 +2,15 @@ package ru.practicum.explorewithme;
 
 import lombok.experimental.UtilityClass;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 @UtilityClass
 public class MapperEndpointHit {
-
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static EndpointHit toEndpointHit(EndpointHitDto endpointHitDto, Application app) {
         EndpointHit endpointHit = new EndpointHit();
         endpointHit.setApp(app);
         endpointHit.setUri(endpointHitDto.getUri());
         endpointHit.setIp(endpointHitDto.getIp());
-        LocalDateTime timestamp = getLocalDateTime(endpointHitDto.getTimestamp());
-        endpointHit.setTimestamp(timestamp);
+        endpointHit.setTimestamp(endpointHitDto.getTimestamp());
         return endpointHit;
     }
 
@@ -26,7 +20,4 @@ public class MapperEndpointHit {
         return application;
     }
 
-    public static LocalDateTime getLocalDateTime(String date) {
-        return LocalDateTime.parse(date, formatter);
-    }
 }

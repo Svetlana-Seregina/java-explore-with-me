@@ -12,11 +12,13 @@ import ru.practicum.explorewithme.dto.comment.NewComment;
 import ru.practicum.explorewithme.dto.event.Event;
 import ru.practicum.explorewithme.dto.user.User;
 import ru.practicum.explorewithme.exception.EntityNotFoundException;
+import ru.practicum.explorewithme.exception.ValidationException;
 import ru.practicum.explorewithme.mappers.CommentMapper;
 import ru.practicum.explorewithme.repository.CommentRepository;
 import ru.practicum.explorewithme.repository.EventRepository;
 import ru.practicum.explorewithme.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,7 +49,7 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentDto> findAllCommentsByAuthor(long userId) {
         User user = findUserInRepository(userId);
         Sort sort = Sort.by("createdDate").descending();
-        List<Comment> userComments = commentRepository.findAllByUser(user, sort);
+        List<Comment> userComments = commentRepository.findAllByAuthor(user, sort);
         log.info("Найдено {} комментариев пользователя.", userComments.size());
 
         if(userComments.isEmpty()) {
@@ -68,11 +70,26 @@ public class CommentServiceImpl implements CommentService {
                 .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList());
 
-        log.info("Найдыны все комментарии к событию {}", allDtoComments);
+        log.info("Найдены все комментарии к событию {}", allDtoComments);
 
         return allDtoComments;
     }
 
+    @Transactional
+    @Override
+    public boolean deleteCommentById(long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("События с id = %d в базе нет.", commentId)));
+
+        if(comment.getCreatedDate().isAfter(LocalDateTime.now().plusMinutes(1))) {
+            throw new ValidationException("Невозможно удалить комментарий оставленный более минуты назад.");
+        }
+
+        commentRepository.deleteById(commentId);
+        log.info("Комментарий с id = {} удален.", commentId);
+
+        return commentRepository.existsById(commentId);
+    }
 
     private User findUserInRepository(long userId) {
         User user = userRepository.findById(userId)

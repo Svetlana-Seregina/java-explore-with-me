@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS users, categories, locations, events, compilation, list_of_entities, participation_request CASCADE;
+DROP TABLE IF EXISTS users, categories, locations, events, compilation, list_of_entities, participation_request CASCADE, comment;
 
 CREATE TABLE IF NOT EXISTS users
 (

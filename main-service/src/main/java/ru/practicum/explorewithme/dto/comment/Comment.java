@@ -21,12 +21,17 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
     private User author;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "event_id")
     private Event event;
 
     private String text;
 
+    @Column(name = "created_date")
     private LocalDateTime createdDate;
 
 }

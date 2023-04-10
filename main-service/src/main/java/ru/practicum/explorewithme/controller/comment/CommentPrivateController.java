@@ -35,4 +35,13 @@ public class CommentPrivateController {
         return commentService.findAllCommentsByAuthor(userId);
     }
 
+    // удалить или редактировать можно коммент, добавленный не более минуты назад
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Boolean> deleteCommentById(@PathVariable long commentId) {
+        log.info("Обрабатываем запрос на удаление комментария пользователя commentId = {}", commentId);
+        boolean deleteComment = commentService.deleteCommentById(commentId);
+        log.info("Пользователь удален ? = {}", deleteComment);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
 }

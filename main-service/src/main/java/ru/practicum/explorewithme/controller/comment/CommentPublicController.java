@@ -19,8 +19,8 @@ public class CommentPublicController {
 
     private final CommentService commentService;
 
-    @GetMapping("/{eventId}/comments")
-    public List<CommentDto> findAllCommentsByAuthor(@PathVariable long eventId) {
+    @GetMapping("/events/{eventId}")
+    public List<CommentDto> findAllCommentsByUserToEvent(@PathVariable long eventId) {
         log.info("Обрабатываем запрос на поиск всех комментариев к событию.");
         return commentService.findAllEventComments(eventId);
     }

@@ -13,4 +13,5 @@ public interface CommentService {
 
     List<CommentDto> findAllEventComments(long eventId);
 
+    boolean deleteCommentById(long commentId);
 }

@@ -80,13 +80,15 @@ public class CompilationServiceImpl implements CompilationService {
         List<Long> eventIds = updateCompilationRequest.getEvents();
         log.info("Количество eventIds: {}", eventIds);
 
+        Set<Event> eventSet = new HashSet<>();
+
+        compilation.setPinned(updateCompilationRequest.getPinned() != null ?
+                updateCompilationRequest.getPinned() : compilation.getPinned());
+        compilation.setTitle(updateCompilationRequest.getTitle() != null && !updateCompilationRequest.getTitle().isBlank() ?
+                updateCompilationRequest.getTitle() : compilation.getTitle());
+
         if (eventIds == null || eventIds.isEmpty()) {
-            Set<Event> eventSet = new HashSet<>();
             compilation.setEvents(eventSet);
-            compilation.setPinned(updateCompilationRequest.getPinned() != null ?
-                    updateCompilationRequest.getPinned() : compilation.getPinned());
-            compilation.setTitle(updateCompilationRequest.getTitle() != null ?
-                    updateCompilationRequest.getTitle() : compilation.getTitle());
             log.info("Создана подборка {}", compilation);
             CompilationDto compilationDto = CompilationMapper.toCompilationDto(compilation, Collections.emptyList());
             log.info("Количество событий в compilationDto: {}", compilationDto.getEvents().size());
@@ -96,13 +98,8 @@ public class CompilationServiceImpl implements CompilationService {
         List<Event> events = eventRepository.findAllById(eventIds);
         log.info("Количество events: {}", events);
 
-        Set<Event> eventSet = new HashSet<>(events);
-
+        eventSet = new HashSet<>(events);
         compilation.setEvents(eventSet);
-        compilation.setPinned(updateCompilationRequest.getPinned() != null ?
-                updateCompilationRequest.getPinned() : compilation.getPinned());
-        compilation.setTitle(updateCompilationRequest.getTitle() != null ?
-                updateCompilationRequest.getTitle() : compilation.getTitle());
 
         List<EventShortDto> eventShortDtoList = events.stream()
                 .map(EventMapper::toEventShortDto)

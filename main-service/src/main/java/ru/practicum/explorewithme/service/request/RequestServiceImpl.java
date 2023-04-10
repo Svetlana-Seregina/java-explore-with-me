@@ -16,6 +16,7 @@ import ru.practicum.explorewithme.repository.EventRepository;
 import ru.practicum.explorewithme.repository.ParticipationRequestRepository;
 import ru.practicum.explorewithme.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -64,16 +65,15 @@ public class RequestServiceImpl implements RequestService {
         }
 
         List<ParticipationRequest> participationRequestList = participationRequestRepository.findAllByEventIdAndStatusIs(eventId, EventRequestStatus.CONFIRMED);
-
         log.info("Размер списка participationRequestList = {}", participationRequestList.size());
-        if (eventRequestStatusUpdateRequest.getStatus().equals("CONFIRMED")) {
+
+        Long participantLimit = event.getParticipantLimit();
+        log.info("Количество участников в событии participantLimit = {}", participantLimit);
+        if (participantLimit != 0 && eventRequestStatusUpdateRequest.getStatus().equals("CONFIRMED")) {
             if (event.getParticipantLimit() <= participationRequestList.size()) {
                 throw new ValidationException("Нельзя подтвердить заявку, уже достигнут лимит по заявкам на данное событие");
             }
         }
-
-        Long participantLimit = event.getParticipantLimit();
-        log.info("Количество участников в событии participantLimit = {}", participantLimit);
 
         List<ParticipationRequest> allConfirmedRequests = participationRequestRepository.findAllByEventIdAndStatusIs(eventId, EventRequestStatus.CONFIRMED);
         log.info("Все подтвержденные заявки в событии allConfirmedRequests = {}", allConfirmedRequests.size());
@@ -101,6 +101,10 @@ public class RequestServiceImpl implements RequestService {
 
         if (allConfirmedRequests.size() == participantLimit) {
             return toEventRequestStatusUpdateResult(allConfirmedRequests, allPendingRequests);
+        }
+
+        if (participantLimit == 0 && eventRequestStatusUpdateRequest.getStatus().equals("CONFIRMED")) {
+            toEventRequestStatusUpdateResult(allPendingRequests, Collections.emptyList());
         }
 
         long countConfirmedRequests = event.getParticipantLimit() - allConfirmedRequests.size();
@@ -225,18 +229,24 @@ public class RequestServiceImpl implements RequestService {
     private EventRequestStatusUpdateResult toEventRequestStatusUpdateResult(
             List<ParticipationRequest> allConfirmedRequests, List<ParticipationRequest> allPendingRequests
     ) {
-        List<ParticipationRequestDto> confirmedRequests = allConfirmedRequests
-                .stream()
-                .map(ParticipationRequestMapper::toParticipationRequestDto)
-                .collect(Collectors.toList());
-        log.info("Список confirmedRequests = {}", confirmedRequests);
+        List<ParticipationRequestDto> confirmedRequests = new ArrayList<>();
+        if (!allConfirmedRequests.isEmpty()) {
+            confirmedRequests = allConfirmedRequests
+                    .stream()
+                    .map(ParticipationRequestMapper::toParticipationRequestDto)
+                    .collect(Collectors.toList());
+            log.info("Список confirmedRequests = {}", confirmedRequests);
+        }
 
-        List<ParticipationRequestDto> rejectedRequests = allPendingRequests
-                .stream()
-                .peek(r -> r.setStatus(EventRequestStatus.REJECTED))
-                .map(ParticipationRequestMapper::toParticipationRequestDto)
-                .collect(Collectors.toList());
-        log.info("Список rejectedRequests = {}", rejectedRequests);
+        List<ParticipationRequestDto> rejectedRequests = new ArrayList<>();
+        if (!allPendingRequests.isEmpty()) {
+            rejectedRequests = allPendingRequests
+                    .stream()
+                    .peek(r -> r.setStatus(EventRequestStatus.REJECTED))
+                    .map(ParticipationRequestMapper::toParticipationRequestDto)
+                    .collect(Collectors.toList());
+            log.info("Список rejectedRequests = {}", rejectedRequests);
+        }
 
         return ParticipationRequestMapper.toEventRequestStatusUpdateResult(confirmedRequests, rejectedRequests);
     }

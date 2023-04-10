@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.toList;
 import static ru.practicum.explorewithme.dto.event.UpdateEventAdminRequest.StateAction.PUBLISH_EVENT;
 import static ru.practicum.explorewithme.dto.event.UpdateEventAdminRequest.StateAction.REJECT_EVENT;
@@ -148,16 +149,10 @@ public class EventServiceImpl implements EventService {
         List<EventFullDto> eventFullDtos = eventsByQuery.stream()
                 .map(EventMapper::toEventFullDto)
                 .map(eventFullDto -> {
-                    if (confirmedRequestsByEventId.isEmpty()) {
-                        return eventFullDto;
-                    }
-                    Long confirmedRequests = confirmedRequestsByEventId.get(eventFullDto.getId());
+                    Long confirmedRequests = confirmedRequestsByEventId.getOrDefault(eventFullDto.getId(), 0L);
                     return EventMapper.toEventFullDto(eventFullDto, confirmedRequests, 0L);
                 }).map(eventFullDto -> {
-                    if (views.isEmpty()) {
-                        return eventFullDto;
-                    }
-                    Long allViews = views.get(eventFullDto.getId());
+                    Long allViews = views.getOrDefault(eventFullDto.getId(), 0L);
                     return EventMapper.toEventFullDtoWithViews(eventFullDto, allViews);
                 })
                 .collect(toList());
@@ -382,7 +377,7 @@ public class EventServiceImpl implements EventService {
         Map<Long, Long> confirmedRequestsByEventId =
                 confirmedRequests
                         .stream()
-                        .collect(Collectors.groupingBy(b -> b.getEvent().getId(), Collectors.counting()));
+                        .collect(Collectors.groupingBy(b -> b.getEvent().getId(), counting()));
         log.info("Найдены confirmedRequestsByEventId = {}", confirmedRequestsByEventId.entrySet());
 
         return confirmedRequestsByEventId;
@@ -411,7 +406,7 @@ public class EventServiceImpl implements EventService {
 
         Map<Long, Long> views = statsClient.getStats(publishedDate, actualDate, uris, true)
                 .stream()
-                .collect(Collectors.groupingBy(b -> (long) Integer.parseInt(b.getUri().substring(8)), Collectors.counting()));
+                .collect(Collectors.toMap(b -> (long) Integer.parseInt(b.getUri().substring(8)), ViewStats::getHits));
 
         log.info("Получена статистика views = {}", views.entrySet());
 
@@ -462,17 +457,11 @@ public class EventServiceImpl implements EventService {
         return events.stream()
                 .map(EventMapper::toEventShortDto)
                 .map(eventShortDto -> {
-                    if (confirmedRequestsByEventId.isEmpty()) {
-                        return eventShortDto;
-                    }
-                    Long confirmedRequests = confirmedRequestsByEventId.get(eventShortDto.getId());
+                    Long confirmedRequests = confirmedRequestsByEventId.getOrDefault(eventShortDto.getId(), 0L);
                     return EventMapper.toEventShortDtoWithConfirmedRequests(eventShortDto, confirmedRequests);
                 })
                 .map(eventShortDto -> {
-                    if (views.isEmpty()) {
-                        return eventShortDto;
-                    }
-                    Long allViews = views.get(eventShortDto.getId());
+                    Long allViews = views.getOrDefault(eventShortDto.getId(), 0L);
                     return EventMapper.toEventShortDtoWithViews(eventShortDto, allViews);
                 })
                 .collect(toList());

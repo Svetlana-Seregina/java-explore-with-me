@@ -3,8 +3,6 @@ package ru.practicum.explorewithme.dto;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "locations", schema = "public")
@@ -20,12 +18,8 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @Valid
     private Double lat; // широта места проведения события
 
-    @NotNull
-    @Valid
     private Double lon; // долгота
 
 }

@@ -21,10 +21,10 @@ public class UserAdminController {
     private final UserService userService;
 
     @GetMapping
-    public List<UserDto> findAllUsers(@RequestParam(value = "ids") List<Long> ids,
+    public List<UserDto> findAllUsers(@RequestParam(value = "ids", required = false) List<Long> ids,
                                       @RequestParam(value = "from", defaultValue = "0") Integer from,
                                       @RequestParam(value = "size", defaultValue = "10") Integer size) {
-        log.info("Обрабатываем запрос на поиск всех пользователей: количество = {}, from = {}, size = {}", ids.size(), from, size);
+        log.info("Обрабатываем запрос на поиск всех пользователей: from = {}, size = {}", from, size);
         return userService.findAllUsers(ids, from, size);
     }
 

@@ -27,7 +27,8 @@ public class CommentMapper {
                 comment.getText(),
                 comment.getAuthor().getName(),
                 comment.getEvent().getId(),
-                comment.getCreatedDate()
+                comment.getCreatedDate(),
+                comment.getUpdatedDate()
         );
     }
 

@@ -12,10 +12,11 @@ public interface CommentService {
 
     List<CommentDto> findAllCommentsByAuthor(long userId);
 
-    List<CommentDto> findAllEventComments(long eventId);
+    List<CommentDto> findAllEventCommentsByUser(long eventId, Integer from, Integer size);
 
     boolean deleteCommentById(long commentId);
 
     CommentDto updateCommentByAuthor(long userId, long commentId, UpdateCommentRequest updateCommentRequest);
 
+    boolean deleteEventCommentByAdmin(long commentId, long eventId);
 }

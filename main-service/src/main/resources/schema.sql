@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS comment
     user_id         BIGINT,
     text   			VARCHAR(7000),
 	created_date    TIMESTAMP WITHOUT TIME ZONE,
+	updated_date    TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users (id),
     CONSTRAINT fk_event_id FOREIGN KEY (event_id) REFERENCES events (id)
 );

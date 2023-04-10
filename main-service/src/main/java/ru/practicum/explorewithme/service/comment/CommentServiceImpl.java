@@ -3,6 +3,8 @@ package ru.practicum.explorewithme.service.comment;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +13,7 @@ import ru.practicum.explorewithme.dto.comment.CommentDto;
 import ru.practicum.explorewithme.dto.comment.NewComment;
 import ru.practicum.explorewithme.dto.comment.UpdateCommentRequest;
 import ru.practicum.explorewithme.dto.event.Event;
+import ru.practicum.explorewithme.dto.event.EventState;
 import ru.practicum.explorewithme.dto.user.User;
 import ru.practicum.explorewithme.exception.EntityNotFoundException;
 import ru.practicum.explorewithme.exception.ValidationException;
@@ -41,8 +44,8 @@ public class CommentServiceImpl implements CommentService {
         User user = findUserInRepository(userId);
         Event event = findEventInRepository(eventId);
 
-        if (event.getInitiator().equals(user)) {
-            throw new ValidationException("Организатор события не может оставлять комментарий.");
+        if (!event.getState().equals(EventState.PUBLISHED) && !event.getInitiator().equals(user)) {
+            throw new ValidationException("Комментарии к неопубликованным событиям может оставлять только инициатор.");
         }
 
         Comment comment = commentRepository.save(CommentMapper.toComment(user, event, newComment));
@@ -67,10 +70,19 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<CommentDto> findAllEventComments(long eventId) {
+    public List<CommentDto> findAllEventCommentsByUser(long eventId, Integer from, Integer size) {
         Event event = findEventInRepository(eventId);
 
-        List<Comment> allComments = commentRepository.findAllByEvent(event);
+        if (!event.getState().equals(EventState.PUBLISHED)) {
+            throw new ValidationException("Нельзя получить комментарии к неопубликованным событиям.");
+        }
+
+        Pageable pageable = PageRequest.of(from, size);
+        List<Comment> allComments = commentRepository.findAllByEvent(event, pageable)
+                .stream()
+                .collect(Collectors.toList());
+        log.info("найдены комментарии к событию = {}", allComments);
+
         List<CommentDto> allDtoComments = allComments.stream()
                 .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList());
@@ -87,6 +99,26 @@ public class CommentServiceImpl implements CommentService {
 
         if (comment.getCreatedDate().isAfter(LocalDateTime.now().plusMinutes(1))) {
             throw new ValidationException("Невозможно удалить комментарий оставленный более минуты назад.");
+        }
+
+        if (comment.getEvent().getState().equals(EventState.PENDING) && !comment.getAuthor().equals(comment.getEvent().getInitiator())) {
+            throw new ValidationException("Невозможно удалить комментарий у неопубликованного события не инициатором.");
+        }
+
+        commentRepository.deleteById(commentId);
+        log.info("Комментарий с id = {} удален.", commentId);
+
+        return commentRepository.existsById(commentId);
+    }
+
+    @Transactional
+    @Override
+    public boolean deleteEventCommentByAdmin(long commentId, long eventId) {
+        Comment comment = findCommentInRepository(commentId);
+        Event event = findEventInRepository(eventId);
+
+        if (!comment.getEvent().equals(event)) {
+            throw new ValidationException("У события нет такого комментария.");
         }
 
         commentRepository.deleteById(commentId);
@@ -110,6 +142,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         comment.setText(updateCommentRequest.getText());
+        comment.setUpdatedDate(LocalDateTime.now());
         log.info("Комментарий с id = {} изменен.", commentId);
 
         return CommentMapper.toCommentDto(comment);

@@ -4,11 +4,15 @@ import lombok.experimental.UtilityClass;
 import ru.practicum.explorewithme.dto.Location;
 import ru.practicum.explorewithme.dto.category.Category;
 import ru.practicum.explorewithme.dto.category.CategoryDto;
+import ru.practicum.explorewithme.dto.comment.Comment;
 import ru.practicum.explorewithme.dto.event.*;
 import ru.practicum.explorewithme.dto.user.User;
 import ru.practicum.explorewithme.dto.user.UserShortDto;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @UtilityClass
 public class EventMapper {
@@ -119,6 +123,7 @@ public class EventMapper {
                 event.getAnnotation(),
                 new CategoryDto(event.getCategory().getId(), event.getCategory().getName()),
                 0L,
+                Collections.emptyList(),
                 event.getEventDate(),
                 event.getId(),
                 new UserShortDto(event.getInitiator().getId(), event.getInitiator().getName()),
@@ -133,6 +138,7 @@ public class EventMapper {
                 eventShortDto.getAnnotation(),
                 eventShortDto.getCategory(),
                 confirmedRequests,
+                eventShortDto.getComments(),
                 eventShortDto.getEventDate(),
                 eventShortDto.getId(),
                 new UserShortDto(eventShortDto.getInitiator().getId(), eventShortDto.getInitiator().getName()),
@@ -147,6 +153,7 @@ public class EventMapper {
                 eventShortDto.getAnnotation(),
                 eventShortDto.getCategory(),
                 eventShortDto.getConfirmedRequests(),
+                eventShortDto.getComments(),
                 eventShortDto.getEventDate(),
                 eventShortDto.getId(),
                 new UserShortDto(eventShortDto.getInitiator().getId(), eventShortDto.getInitiator().getName()),
@@ -156,4 +163,21 @@ public class EventMapper {
         );
     }
 
+
+    public static EventShortDto toEventShortDtoWithComments(EventShortDto eventShortDto, List<Comment> allComments) {
+        return new EventShortDto(
+                eventShortDto.getAnnotation(),
+                eventShortDto.getCategory(),
+                eventShortDto.getConfirmedRequests(),
+                allComments.stream()
+                        .map(CommentMapper::toCommentDto)
+                        .collect(Collectors.toList()),
+                eventShortDto.getEventDate(),
+                eventShortDto.getId(),
+                new UserShortDto(eventShortDto.getInitiator().getId(), eventShortDto.getInitiator().getName()),
+                eventShortDto.getPaid(),
+                eventShortDto.getTitle(),
+                eventShortDto.getViews()
+        );
+    }
 }

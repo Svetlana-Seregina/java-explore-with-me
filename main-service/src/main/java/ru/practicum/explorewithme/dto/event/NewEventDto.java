@@ -30,6 +30,7 @@ public class NewEventDto {
     private LocalDateTime eventDate;
 
     @Valid
+    @NotNull
     private Location location;
 
     private boolean paid; // default: false; Нужно ли оплачивать участие в событии
@@ -48,9 +49,9 @@ public class NewEventDto {
     @Data
     public static class Location {
         @NotNull
-        private final double lat;
+        private final Double lat;
         @NotNull
-        private final double lon;
+        private final Double lon;
     }
 
 }

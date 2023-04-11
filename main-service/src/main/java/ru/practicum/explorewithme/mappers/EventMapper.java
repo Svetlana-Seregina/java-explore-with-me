@@ -123,7 +123,7 @@ public class EventMapper {
                 event.getAnnotation(),
                 new CategoryDto(event.getCategory().getId(), event.getCategory().getName()),
                 0L,
-                Collections.emptyList(),
+                0L,
                 event.getEventDate(),
                 event.getId(),
                 new UserShortDto(event.getInitiator().getId(), event.getInitiator().getName()),
@@ -164,14 +164,12 @@ public class EventMapper {
     }
 
 
-    public static EventShortDto toEventShortDtoWithComments(EventShortDto eventShortDto, List<Comment> allComments) {
+    public static EventShortDto toEventShortDtoWithComments(EventShortDto eventShortDto, Long allComments) {
         return new EventShortDto(
                 eventShortDto.getAnnotation(),
                 eventShortDto.getCategory(),
                 eventShortDto.getConfirmedRequests(),
-                allComments.stream()
-                        .map(CommentMapper::toCommentDto)
-                        .collect(Collectors.toList()),
+                allComments,
                 eventShortDto.getEventDate(),
                 eventShortDto.getId(),
                 new UserShortDto(eventShortDto.getInitiator().getId(), eventShortDto.getInitiator().getName()),

@@ -195,7 +195,7 @@ public class EventServiceImpl implements EventService {
 
         Map<Long, Long> confirmedRequestsByEventId = findConfirmedRequests(events);
         Map<Long, Long> views = findViewStats(events);
-        Map<Long, List<Comment>> comments = findComments(events);
+        Map<Long, Long> comments = findComments(events);
 
         List<EventShortDto> eventShortDtoList = toEventShortDtoList(events, confirmedRequestsByEventId, views, comments);
         log.info("eventShortDtoList = {}", eventShortDtoList);
@@ -387,7 +387,7 @@ public class EventServiceImpl implements EventService {
         return confirmedRequestsByEventId;
     }
 
-    private Map<Long, List<Comment>> findComments(List<Event> events) {
+    private Map<Long, Long> findComments(List<Event> events) {
 
         log.info("Поиск комментариев к событию.");
 
@@ -405,10 +405,10 @@ public class EventServiceImpl implements EventService {
         if (comments.isEmpty()) {
             return new HashMap<>();
         }
-        Map<Long, List<Comment>> commentsByEventId = comments
+        Map<Long, Long> commentsByEventId = comments
                 .stream()
-                .collect(Collectors.groupingBy(b -> b.getEvent().getId(), toList()));
-        log.info("Найдены commentsByEventId = {}", commentsByEventId.entrySet());
+                .collect(Collectors.groupingBy(b -> b.getEvent().getId(), counting()));
+        log.info("Найдены commentsByEventId = {}", commentsByEventId);
 
         return commentsByEventId;
     }
@@ -484,7 +484,7 @@ public class EventServiceImpl implements EventService {
     private List<EventShortDto> toEventShortDtoList(List<Event> events,
                                                     Map<Long, Long> confirmedRequestsByEventId,
                                                     Map<Long, Long> views,
-                                                    Map<Long, List<Comment>> comments) {
+                                                    Map<Long, Long> comments) {
 
         return events.stream()
                 .map(EventMapper::toEventShortDto)
@@ -497,7 +497,7 @@ public class EventServiceImpl implements EventService {
                     return EventMapper.toEventShortDtoWithViews(eventShortDto, allViews);
                 })
                 .map(eventShortDto -> {
-                    List<Comment> allComments = comments.getOrDefault(eventShortDto.getId(), Collections.emptyList());
+                    Long allComments = comments.getOrDefault(eventShortDto.getId(), 0L);
                     return EventMapper.toEventShortDtoWithComments(eventShortDto, allComments);
                 })
                 .collect(toList());

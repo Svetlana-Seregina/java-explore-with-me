@@ -119,6 +119,7 @@ public class EventMapper {
                 event.getAnnotation(),
                 new CategoryDto(event.getCategory().getId(), event.getCategory().getName()),
                 0L,
+                0L,
                 event.getEventDate(),
                 event.getId(),
                 new UserShortDto(event.getInitiator().getId(), event.getInitiator().getName()),
@@ -133,6 +134,7 @@ public class EventMapper {
                 eventShortDto.getAnnotation(),
                 eventShortDto.getCategory(),
                 confirmedRequests,
+                eventShortDto.getComments(),
                 eventShortDto.getEventDate(),
                 eventShortDto.getId(),
                 new UserShortDto(eventShortDto.getInitiator().getId(), eventShortDto.getInitiator().getName()),
@@ -147,6 +149,7 @@ public class EventMapper {
                 eventShortDto.getAnnotation(),
                 eventShortDto.getCategory(),
                 eventShortDto.getConfirmedRequests(),
+                eventShortDto.getComments(),
                 eventShortDto.getEventDate(),
                 eventShortDto.getId(),
                 new UserShortDto(eventShortDto.getInitiator().getId(), eventShortDto.getInitiator().getName()),
@@ -156,4 +159,19 @@ public class EventMapper {
         );
     }
 
+
+    public static EventShortDto toEventShortDtoWithComments(EventShortDto eventShortDto, Long allComments) {
+        return new EventShortDto(
+                eventShortDto.getAnnotation(),
+                eventShortDto.getCategory(),
+                eventShortDto.getConfirmedRequests(),
+                allComments,
+                eventShortDto.getEventDate(),
+                eventShortDto.getId(),
+                new UserShortDto(eventShortDto.getInitiator().getId(), eventShortDto.getInitiator().getName()),
+                eventShortDto.getPaid(),
+                eventShortDto.getTitle(),
+                eventShortDto.getViews()
+        );
+    }
 }

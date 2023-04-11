@@ -11,6 +11,7 @@ import ru.practicum.explorewithme.StatsClient;
 import ru.practicum.explorewithme.ViewStats;
 import ru.practicum.explorewithme.dto.Location;
 import ru.practicum.explorewithme.dto.category.Category;
+import ru.practicum.explorewithme.dto.comment.Comment;
 import ru.practicum.explorewithme.dto.event.*;
 import ru.practicum.explorewithme.dto.event.UpdateEventUserRequest.StateAction;
 import ru.practicum.explorewithme.dto.request.EventRequestStatus;
@@ -43,6 +44,7 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final LocationRepository locationRepository;
     private final ParticipationRequestRepository participationRequestRepository;
+    private final CommentRepository commentRepository;
     private final StatsClient statsClient;
 
     @SneakyThrows
@@ -151,7 +153,8 @@ public class EventServiceImpl implements EventService {
                 .map(eventFullDto -> {
                     Long confirmedRequests = confirmedRequestsByEventId.getOrDefault(eventFullDto.getId(), 0L);
                     return EventMapper.toEventFullDto(eventFullDto, confirmedRequests, 0L);
-                }).map(eventFullDto -> {
+                })
+                .map(eventFullDto -> {
                     Long allViews = views.getOrDefault(eventFullDto.getId(), 0L);
                     return EventMapper.toEventFullDtoWithViews(eventFullDto, allViews);
                 })
@@ -192,8 +195,9 @@ public class EventServiceImpl implements EventService {
 
         Map<Long, Long> confirmedRequestsByEventId = findConfirmedRequests(events);
         Map<Long, Long> views = findViewStats(events);
+        Map<Long, Long> comments = findComments(events);
 
-        List<EventShortDto> eventShortDtoList = toEventShortDtoList(events, confirmedRequestsByEventId, views);
+        List<EventShortDto> eventShortDtoList = toEventShortDtoList(events, confirmedRequestsByEventId, views, comments);
         log.info("eventShortDtoList = {}", eventShortDtoList);
 
         if (sort.equals("VIEWS")) {
@@ -383,6 +387,33 @@ public class EventServiceImpl implements EventService {
         return confirmedRequestsByEventId;
     }
 
+    private Map<Long, Long> findComments(List<Event> events) {
+
+        log.info("Поиск комментариев к событию.");
+
+        List<Long> eventIds = new ArrayList<>();
+        for (Event event : events) {
+            Long evId = event.getId();
+            eventIds.add(evId);
+        }
+        log.info("Список eventIds для поиска = {}", eventIds.size());
+
+        List<Comment> comments = commentRepository.findAllById(eventIds);
+
+        log.info("Размер списка comments = {}", comments.size());
+
+        if (comments.isEmpty()) {
+            return new HashMap<>();
+        }
+        Map<Long, Long> commentsByEventId = comments
+                .stream()
+                .collect(Collectors.groupingBy(b -> b.getEvent().getId(), counting()));
+        log.info("Найдены commentsByEventId = {}", commentsByEventId);
+
+        return commentsByEventId;
+    }
+
+
     private Map<Long, Long> findViewStats(List<Event> events) {
         log.info("Поиск статистики просмотров.");
 
@@ -452,7 +483,8 @@ public class EventServiceImpl implements EventService {
 
     private List<EventShortDto> toEventShortDtoList(List<Event> events,
                                                     Map<Long, Long> confirmedRequestsByEventId,
-                                                    Map<Long, Long> views) {
+                                                    Map<Long, Long> views,
+                                                    Map<Long, Long> comments) {
 
         return events.stream()
                 .map(EventMapper::toEventShortDto)
@@ -463,6 +495,10 @@ public class EventServiceImpl implements EventService {
                 .map(eventShortDto -> {
                     Long allViews = views.getOrDefault(eventShortDto.getId(), 0L);
                     return EventMapper.toEventShortDtoWithViews(eventShortDto, allViews);
+                })
+                .map(eventShortDto -> {
+                    Long allComments = comments.getOrDefault(eventShortDto.getId(), 0L);
+                    return EventMapper.toEventShortDtoWithComments(eventShortDto, allComments);
                 })
                 .collect(toList());
     }
